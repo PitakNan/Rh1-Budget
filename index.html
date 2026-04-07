@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการงบประมาณ สำนักงานเขตสุขภาพที่ 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            direction: ltr;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1a5276 0%, #0d2a47 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin: 8px 0;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+            padding-left: 20px;
+        }
+
+        .sidebar-nav a.active {
+            background-color: #f39c12;
+            color: white;
+            border-left: 4px solid #e67e22;
+            padding-left: 11px;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: #1a5276;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+        }
+
+        .hamburger:hover {
+            background: #0d2a47;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a5276, #f39c12);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .header-text h1 {
+            color: #1a5276;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Dashboard */
+        .dashboard-filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .kpi-card.blue {
+            background: linear-gradient(135deg, #1a5276 0%, #2e7fa3 100%);
+        }
+
+        .kpi-card.yellow {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .kpi-card.green {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .kpi-card.red {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .kpi-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .dropdown-item.clickable {
+            color: #1a5276;
+            font-weight: 500;
+        }
+
+        .dropdown-item.clickable:hover {
+            background-color: #e8f4f8;
+        }
+
+        /* Projects Grid */
+        .projects-section {
+            display: none;
+        }
+
+        .projects-section.show {
+            display: block;
+        }
+
+        .projects-filter {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .projects-filter input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #ddd;
+        }
+
+        .project-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .project-card.reserved {
+            border-left-color: #1a5276;
+        }
+
+        .project-card.in-progress {
+            border-left-color: #f39c12;
+        }
+
+        .project-card.completed {
+            border-left-color: #27ae60;
+        }
+
+        .project-card h3 {
+            color: #1a5276;
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .project-card-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .project-card-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a5276;
+            margin: 10px 0;
+        }
+
+        .project-card-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-in-progress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #1a5276;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #1a5276;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d2a47;
+            box-shadow: 0 2px 8px rgba(26,82,118,0.3);
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #1e8449;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d68910;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a5276;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a5276;
+            box-shadow: 0 0 0 3px rgba(26,82,118,0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Audit Log */
+        .audit-log {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .audit-log-entry {
+            padding: 10px;
+            border-left: 3px solid #1a5276;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .audit-log-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 15px;
+                max-height: 60vh;
+                overflow-y: auto;
+                display: none;
+                flex-direction: column;
+                z-index: 999;
+            }
+
+            .sidebar.mobile-open {
+                display: flex;
+            }
+
+            .hamburger {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 60px 15px 15px;
+            }
+
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group select {
+                width: 100%;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+
+            .sidebar-nav a {
+                padding: 10px 12px;
+            }
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #999;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <button class="hamburger" id="hamburgerBtn">☰</button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">ระบบจัดการงบ</div>
+        <ul class="sidebar-nav">
+            <li><a class="nav-link active" data-page="dashboard">📊 แดชบอร์ด</a></li>
+            <li><a class="nav-link" data-page="funding-sources">💰 จัดการแหล่งเงิน</a></li>
+            <li><a class="nav-link" data-page="service-units">🏥 จัดการหน่วยบริการ</a></li>
+            <li><a class="nav-link" data-page="projects">📋 จัดการโครงการ</a></li>
+            <li><a class="nav-link" data-page="statuses">📝 สถานะโครงการ</a></li>
+            <li><a class="nav-link" data-page="categories">🏷️ งบที่ใช้เกี่ยวข้องกับ</a></li>
+            <li><a class="nav-link" data-page="import-export">📤 Import/Export</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="logo-placeholder">หลวง</div>
+            <div class="header-text">
+                <h1>รายงานงบพัฒนาระบบบริการและนโยบายที่สำคัญ</h1>
+                <p>สำนักงานเขตสุขภาพที่ 1</p>
+            </div>
+        </div>
+
+        <!-- PAGE 1: Dashboard -->
+        <div id="dashboard" class="page active">
+            <div class="dashboard-filters">
+                <div class="filter-group">
+                    <label>ปีงบประมาณ:</label>
+                    <select id="yearFilter">
+                        <option value="">เฉพาะปีที่ยังมีเงินเหลือ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="kpi-cards">
+                <div class="kpi-card blue" id="remainingCard">
+                    <div class="kpi-label">วงเงินคงเหลือ</div>
+                    <div class="kpi-value" id="remainingValue">฿0</div>
+                    <div class="kpi-subtitle">Remaining Budget</div>
+                </div>
+                <div class="kpi-card yellow" id="usedCard">
+                    <div class="kpi-label">วงเงินที่ใช้ไป</div>
+                    <div class="kpi-value" id="usedValue">฿0</div>
+                    <div class="kpi-subtitle">Used Budget</div>
+                </div>
+                <div class="kpi-card green" id="completedCard">
+                    <div class="kpi-label">โครงการเสร็จสิ้น</div>
+                    <div class="kpi-value" id="completedValue">0</div>
+                    <div class="kpi-subtitle">Completed Projects</div>
+                </div>
+                <div class="kpi-card red" id="inProgressCard">
+                    <div class="kpi-label">อยู่ระหว่างดำเนินการ</div>
+                    <div class="kpi-value" id="inProgressValue">0</div>
+                    <div class="kpi-subtitle">In Progress</div>
+                </div>
+            </div>
+
+            <div id="remainingDropdown" class="dropdown-menu"></div>
+            <div id="usedDropdown" class="dropdown-menu"></div>
+            <div id="completedDropdown" class="dropdown-menu"></div>
+
+            <div class="projects-section" id="projectsSection">
+                <div class="projects-filter">
+                    <input type="text" id="projectSearch" placeholder="ค้นหาโครงการ...">
+                </div>
+                <div class="projects-grid" id="projectsGrid"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: Funding Sources -->
+        <div id="funding-sources" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.showFundingModal('add')">+ เพิ่มแหล่งเงิน</button>
+            </div>
+            <div class="table-container">
+                <table id="fundingTable">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อแหล่งเงิน</th>
+                            <th>ปีงบประมาณ</th>
+                            <th>วงเงินทั้งสิ้น</th>
+                            <th>เงินคงเหลือ</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fundingBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="audit-log" id="fundingAuditLog" style="display:none;">
+                <h3>บันทึกการเปลี่ยนแปลง</h3>
+                <div id="fundingAuditContent"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Service Units -->
+        <div id="service-units" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.showServiceUnitModal('add')">+ เพิ่มหน่วยบริการ</button>
+                <label style="margin-left: auto;">
+                    จังหวัด:
+                    <select id="provinceFilter" onchange="app.renderServiceUnits()">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </label>
+                <label>
+                    ระดับ:
+                    <select id="levelFilter" onchange="app.renderServiceUnits()">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </label>
+            </div>
+            <div class="table-container">
+                <table id="serviceUnitsTable">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อหน่วยบริการ</th>
+                            <th>ระดับ</th>
+                            <th>จังหวัด</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceUnitsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 4: Projects -->
+        <div id="projects" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.showProjectModal('add')">+ เพิ่มโครงการ</button>
+                <select id="projectYearFilter" onchange="app.renderProjects()" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="">ปีงบประมาณทั้งหมด</option>
+                </select>
+                <select id="projectStatusFilter" onchange="app.renderProjects()" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="">สถานะทั้งหมด</option>
+                </select>
+                <select id="projectCategoryFilter" onchange="app.renderProjects()" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="">หมวดหมู่ทั้งหมด</option>
+                </select>
+                <input type="text" id="projectNameFilter" placeholder="ค้นหาชื่อโครงการ..." onkeyup="app.renderProjects()" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; min-width: 200px;">
+                <button class="btn-warning" onclick="app.toggleProjectAuditLog()" style="width: auto;">📋 บันทึกการเปลี่ยนแปลง</button>
+            </div>
+            <div class="table-container">
+                <table id="projectsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ชื่อโครงการ</th>
+                            <th>เจ้าของ</th>
+                            <th>วงเงินอนุมัติ</th>
+                            <th>แหล่งเงิน</th>
+                            <th>วันโอนเงิน</th>
+                            <th>สถานะ</th>
+                            <th>หมวดหมู่</th>
+                            <th>ปีงบ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="audit-log" id="projectsAuditLog" style="display:none;">
+                <h3>บันทึกการเปลี่ยนแปลง</h3>
+                <div id="projectsAuditContent"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 5: Project Statuses -->
+        <div id="statuses" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.showStatusModal('add')">+ เพิ่มสถานะ</button>
+            </div>
+            <div class="table-container">
+                <table id="statusesTable">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อสถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statusesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 6: Budget Categories -->
+        <div id="categories" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.showCategoryModal('add')">+ เพิ่มหมวดหมู่</button>
+            </div>
+            <div class="table-container">
+                <table id="categoriesTable">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อหมวดหมู่</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 7: Import/Export -->
+        <div id="import-export" class="page">
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.exportData()">📥 ดาวน์โหลดข้อมูล (JSON)</button>
+                <button class="btn-success" onclick="document.getElementById('importFile').click()">📤 นำเข้าข้อมูล (JSON)</button>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="app.importData(event)">
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                <p>ใช้ฟังก์ชันนี้เพื่อสำรองข้อมูลและคืนค่าข้อมูล</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="pinModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">ตรวจสอบสิทธิ์</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>โปรดป้อน PIN:</label>
+                    <input type="password" id="pinInput" placeholder="PIN">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closePinModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.verifyPin()">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fundingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="fundingModalTitle"></div>
+            <div class="modal-body" id="fundingModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeFundingModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveFunding()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="transferModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">โอนเงิน</div>
+            <div class="modal-body" id="transferModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeTransferModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveTransfer()">โอนเงิน</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="serviceUnitModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="serviceUnitModalTitle"></div>
+            <div class="modal-body" id="serviceUnitModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeServiceUnitModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveServiceUnit()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="projectModalTitle"></div>
+            <div class="modal-body" id="projectModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeProjectModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveProject()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="statusModalTitle"></div>
+            <div class="modal-body" id="statusModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeStatusModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveStatus()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="categoryModalTitle"></div>
+            <div class="modal-body" id="categoryModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="app.closeCategoryModal()">ยกเลิก</button>
+                <button class="btn-primary" onclick="app.saveCategory()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const INITIAL_DATA = {"projects":[{"id":1,"name":"โครงการ Alert awareness symptom ACS รับรู้อาการเร็ว รักษารวดเร็ว  เขตสุขภาพที่ 1 ปีงบประมาณ 2566 (โปสเตอร์ประชาสัมพันธ์เรื่อง symptom awareness)","owner":"รพ.ลำปาง","requested":52500.0,"approved":52500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-08","actual_spent":52500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคหัวใจและหลอดเลือด","fiscal_year":2566},{"id":2,"name":"โครงการพัฒนาระบบบริการสุขภาพ สาขาโรคมะเร็ง เขตสุขภาพที่ 1 ปี 2566","owner":"รพ.ลำปาง","requested":38900.0,"approved":38900.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-29","actual_spent":38900.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคมะเร็ง","fiscal_year":2566},{"id":3,"name":"โครงการอบรมพยาบาล Traum nurse coordination การพยาบาลเพื่อจัดการระบบการดูแลผู้ป่วยบาดเจ็บ เขตสุขภาพที่ 1 ปีงบประมาณ 2566","owner":"รพ.นครพิงค์","requested":149300.0,"approved":149300.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-11","actual_spent":149300.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"อุบัติเหตุและการบาดเจ็บ","fiscal_year":2566},{"id":4,"name":"โครงการประชุมคณะกรรมการ กลุ่มย่อย 3 ล้านนา","owner":"รพ.พะเยา","requested":17100.0,"approved":17100.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":17100.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":5,"name":"โครงการพัฒนาระบบป้องกันปัญหาการฆ่าตัวตายเขตสุขภาพที่ 1","owner":"รพ.สวนปรุง","requested":1250000.0,"approved":1250000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":1250000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":6,"name":"โครงการพัฒนาความรอบรู้ด้านสุขภาพจิตในการดูแลกลุ่มผู้ป่วย SMI-V และญาติแก่ผู้ปฏิบัติงานในคลินิกจิตเวชและยาเสพติด","owner":"รพ.สวนปรุง","requested":130000.0,"approved":130000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-01","actual_spent":130000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":7,"name":"โครงการเสริมสร้างความรอบรู้ด้านสุขภาพจิตเพิ่มพลังวัคซีนใจในชุมชน เขตสุขภาพที่ 1 ปีงบประมาณ 2566","owner":"ศูนย์สุขภาพจิตที่ 1 ชม.","requested":565000.0,"approved":565000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-25","actual_spent":565000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":8,"name":"โครงการพัฒนาศักยภาพเครือข่ายและเสริมสร้างความเข้มแข็งระบบการดูแลสุขภาพจิตเด็กและวัยรุ่น","owner":"สถาบันพัฒนาการเด็กฯ","requested":292900.0,"approved":292900.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-31","actual_spent":292900.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":9,"name":"โครงการประชุมเชิงปฏิบัติการพัฒนาทีมสหวิชาชีพในการให้บริการระบบการแพทย์ปฐมภูมิ เขตสุขภาพที่ 1","owner":"สสจ.ลำพูน","requested":784700.0,"approved":784700.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-04-26","actual_spent":784700.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":10,"name":"โครงการพัฒนาระบบการดูแลสุขภาพช่องปาก เขตสุขภาพที่ 1","owner":"รพ.เชียงรายฯ","requested":32000.0,"approved":32000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":32000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ทันตกรรม","fiscal_year":2566},{"id":11,"name":"โครงการประชุมวิชาการเพื่ออบรมและให้บริการฝังรากเทียมในดครงการฟันเทียม รากฟันเทียม เฉลิมพระเกียรติฯ","owner":"รพ.เชียงรายฯ\nสสจ.เชียงใหม่","requested":45850.0,"approved":45850.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"27/3/2023\n1/2/2023","actual_spent":45850.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ทันตกรรม","fiscal_year":2566},{"id":12,"name":"โครงการประชุมวิชาการฟื้นฟูความรู้ให้แก่บุคลากรในการดูแลผู้ป่วยโรคไต ประจำปี 2566","owner":"รพ.นครพิงค์","requested":216700.0,"approved":38660.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-18","actual_spent":38660.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไต","fiscal_year":2566},{"id":13,"name":"โครงการพัฒนาศักยภาพบุคลากรหลักสูตรผู้จัดการรายกรณีโรคเบาหวานและความดัน (Case Manager)","owner":"สสจ.ลำปาง","requested":880000.0,"approved":880000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-04-27","actual_spent":880000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2566},{"id":14,"name":"โครงการพัฒนาระบบบริการสุขภาพสาขาการแพทย์แผนไทยและการแพทย์ผสมผสานและสาขากัญชาทางการแพทย์ เขตสุขภาพที่ 1","owner":"สสจ.แพร่","requested":225420.0,"approved":225420.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":225420.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แพทย์แผนไทย","fiscal_year":2566},{"id":15,"name":"โครงการพัฒนาศักยภาพการวางแผนการดูแลล่วงหน้า (Advance care planning) สำหรับบุคลากรที่ให้การดูแลผู้ป่วยแบบประคับประคอง เขตสุขภาพที่ 1","owner":"รพ.พะเยา","requested":103600.0,"approved":103600.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":103600.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การดูแลแบบประคับประคอง","fiscal_year":2566},{"id":16,"name":"โครงการ การใช้ยา การตรวจทางห้องปฏิบัติการอย่างสมเหตุผลและการจัดการเชื้อดื้อนาต้านจุลชีพ เขตสุขภาพที่ 1","owner":"รพ.เชียงรายฯ","requested":100800.0,"approved":100800.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-02","actual_spent":100800.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":17,"name":"โครงการพัฒนาระบบบริการสุขภาพ (Service Plan) สาขาศัลยกรรม เขตสุขภาพที่ 1 ปี 2566","owner":"รพ.ลำปาง","requested":18200.0,"approved":18200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-01","actual_spent":18200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ศัลยกรรม","fiscal_year":2566},{"id":18,"name":"โครงการอบรมพัฒนาศักยภาพบุคลากรเครือข่าย สาขาอายุรกรรม เขตสุขภาพที่ 1","owner":"รพ.น่าน","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"อายุรกรรม","fiscal_year":2566},{"id":19,"name":"โครงการพัฒนาสุขภาพสตรีตั้งครรภ์และเด็กปฐมภูมิ","owner":"รพ.ลำพูน","requested":115800.0,"approved":115800.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":115800.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แม่และเด็ก","fiscal_year":2566},{"id":20,"name":"โครงการพัฒนาระบบบริการสุขภาพ (Service Plan) สาขาออร์โธปิดิกส์ เขตสุขภาพที่ 1 ปี 2566","owner":"รพ.แพร่","requested":123500.0,"approved":123500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-19","actual_spent":123500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":21,"name":"โครงการประชุมวิชาการสาธารณสุข เขตสุขภาพที่ 1 ประจำปี 2566","owner":"สำนักงานเขตสุขภาพที่ 1","requested":430000.0,"approved":430000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-08-17","actual_spent":430000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":22,"name":"การศึกษาการเชื่อมต่อข้อมูลการเฝ้าระวังป้องกันควบคุมโรคระหว่าง อปท.กับกระทรวงสาธารณสุข","owner":"สคร.1","requested":30000.0,"approved":30000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-13","actual_spent":30000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":23,"name":"พัฒนาและฟื้นฟู CDCU ระตับจังหวัด","owner":"มีหลายแห่ง","requested":641650.0,"approved":556850.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-20","actual_spent":556850.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ระบาดวิทยา","fiscal_year":2566},{"id":24,"name":"โครงการพัฒนาศักยภาพทีมSAT/STAG ระดับจังหวัด","owner":"มีหลายแห่ง","requested":491300.0,"approved":345100.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-20","actual_spent":345100.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ภาวะฉุกเฉินสาธารณสุข","fiscal_year":2566},{"id":25,"name":"โครงการประชุมเชิงปฏิบัติการพัฒนาศักยภาพผู้ปฏิบัติงาน (ใหม่) ตามหลักสูตรพัฒาศักยภาพผุ้ปฏิบัติงานวัณโรค","owner":"สคร.1 ชม.","requested":299700.0,"approved":299700.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":266383.0,"remaining":33317.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"ดำเนินการเรียกเงินคืนแล้ว (33,317 บาท) ตามหนังสือที่ สธ 0226/7323 ลงวันที่ 8 ตุลาคม 2568","budget_category":"วัณโรค","fiscal_year":2566},{"id":26,"name":"โครงการการบริการผู้ป่วยสูงอายุกระดูกหักรูปแบบใหม่ (ใช้เงินที่ฝากไว้ รพ.เกาะคา 3.5 ล้าน)","owner":"รพ.แพร่","requested":3500000.0,"approved":3500000.0,"funding_source":"รพ.เกาะคา","transfer_date":"2023-06-07","actual_spent":3500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":27,"name":"โครงการเข้าถึงยากลุ่ม LAMA เพื่อลดความรุนแรงและการชะลอการ Admit ในผู้ป่วยโรคปอดอุดกั้นเรื้อรัง","owner":"รพ.น่าน","requested":8010000.0,"approved":8010000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-14","actual_spent":8010000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคระบบทางเดินหายใจ","fiscal_year":2566},{"id":28,"name":"โครงการอบรมเชิงปฏิบัติการเรื่องการตรวจสมรรถภาพปอดสไปโรเมตรีย์","owner":"สนง.เขตโอนเงิน","requested":120000.0,"approved":114000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-08-24","actual_spent":114000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคระบบทางเดินหายใจ","fiscal_year":2566},{"id":29,"name":"โครงการ Mechanical Thrombectomy เขตสุขภาพที่ 1","owner":"รพ.เชียงรายฯ","requested":3000000.0,"approved":3000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-09-20","actual_spent":3000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคหลอดเลือดสมอง","fiscal_year":2566},{"id":30,"name":"โครงการเพิ่มศักยภาพการจัดการแก้ไขปัญหาผลกระทบต่อสุขภาพจากมลพิษจากมลพิษอากาศ PM 2.5 เขตสุขภาพที่ 1 (เปลี่ยนรูปแบบเป็นการประชุมผ่าน Zoom)","owner":"สสจ.เชียงใหม่","requested":33000.0,"approved":0.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"-","actual_spent":0.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":31,"name":"โครงการอบรมหลักสูตรการลำเลียงผู้ป่วยทางเฮลิคอปเตอร์ขั้นพื้นฐาน(Basic Helicopter Emergency Medical Services Course : Basic HEMS) ในจังหวัดที่มีพื้นที่ทุรกันดารและห่างไกล เขตสุขภาพที่ 1 ปี 2566","owner":"สสจ.เชียงใหม่","requested":916550.0,"approved":916550.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":916550.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน-EMS","fiscal_year":2566},{"id":32,"name":"โครงการพัฒนาการลำเลียงผู้ป่วยฉุกเฉินทางอากาศ เขตสุขภาพที่ 1 ปีงบประมาณ 2566","owner":"รพ.นครพิงค์","requested":3786920.0,"approved":3786920.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-19","actual_spent":3786920.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน-EMS","fiscal_year":2566},{"id":33,"name":"โครงการอาคารอุบัติเหตุโรงพยาบาลพาน","owner":"รพ.พาน","requested":8951000.0,"approved":8951000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-14","actual_spent":8951000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":34,"name":"โครงการประชุมเชิงปฏิบัติการเครือข่าย HR Network นักทรัพยากรบุคคลมืออาชีพ เขตสุขภาพที่ 1","owner":"สนง.เขตฯ (CHRO)","requested":234920.0,"approved":91030.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-09-12","actual_spent":91030.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":35,"name":"โครงการอบรมปฐมนิเทศข้าราชการบรรจุใหม่(ตำแหน่งแพทย์ ทันตแพทย์) เขตสุขภาพที่ 1","owner":"สนง.เขตฯ (CHRO)","requested":349840.0,"approved":314116.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-18","actual_spent":314116.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":36,"name":"RRHL (Rapid Response Health Literacy ) เขตสุขภาพที่ 1","owner":"สนง.เขต (ล้างหนี้)","requested":350000.0,"approved":187645.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-21","actual_spent":187645.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":37,"name":"ประชุมเชิงปฏิบัติการพันาประสิทธิภาพการเงินการคลังของหน่วยบริการให้มีศูนย์จัดเก็บรายได้คุณภาพ (7S7C7E) เขตสุขภาพที่ 1 ประจำปีงบประมาณ 2566","owner":"สนง.เขต (ล้างหนี้)","requested":185300.0,"approved":185300.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":185300.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":38,"name":"โครงการอบรมพัฒนาสมรรถนะผู้ปฏิบัติงานด้านควบคุมภายใน และงานพัสดุ หน่วยบริการในเขตสุขภาพที่ 1 ประจำปีงบประมาณ 2566","owner":"สนง.เขต (ล้างหนี้)","requested":286742.0,"approved":286742.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":286742.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":39,"name":"โครงการอบรมพัฒนาสมรรถนะผู้ปฏิบัติงานด้านบัญชี หน่วยบริการในเขตสุขภาพที่ 1 ประจำปีงบประมาณ 2566","owner":"สนง.เขต (ล้างหนี้)","requested":252236.0,"approved":252236.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":252236.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":40,"name":"ประชุมเชิงปฏิบัติการพัฒนาศักยภาพบุคลากรด้านการตรวจสอบเวชระเบียนของหน่วยบริการ ปีงบประมาณ 2566","owner":"สนง.เขต (ล้างหนี้แล้ว)","requested":315600.0,"approved":305986.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-05-19","actual_spent":305986.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":41,"name":"โครงการสอบทานระบบการบริหารจัดการด้านการเงินการคลังเขตสุขภาพที่ 1","owner":"สนง.เขต","requested":628800.0,"approved":177000.2,"funding_source":"สำนักงานเขตฯ","transfer_date":"20/4/0223","actual_spent":177000.2,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":42,"name":"สนับสนุนแพทย์เฉพาะทางด้านอายุรกรรมปฏิบัติงานรพ.แม่สะเรียง","owner":"รพ.แม่สะเรียง","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"อายุรกรรม","fiscal_year":2566},{"id":43,"name":"สนับสนุนค่าตอบแทนปฏิบัติงานต่างสถานบริการของวิสัญญีแพทย์ที่มาช่วยปฏิบัติงาน สาขาขาดแคลน รพ.เชียงคำ จ.พะเยา","owner":"รพ.เชียงคำ","requested":180000.0,"approved":180000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":180000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"วิสัญญี","fiscal_year":2566},{"id":44,"name":"ค่าตอบแทนแพทย์สาขา ออโธปิดิกส์ รพ.ศรีสังวาลย์","owner":"รพ.ศรีสังวาลย์","requested":1933880.0,"approved":1933880.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":1933880.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":45,"name":"ค่าตอบแทนแพทย์สาขา ออโธปิดิกส์ รพ.ศรีสังวาลย์","owner":"รพ.ศรีสังวาลย์","requested":240000.0,"approved":240000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-27","actual_spent":240000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":46,"name":"โครงการพัฒนาการจัดบริการในสาขาขาดแคลน สาขาอายุรกรรมโรคหัวใจ โสต ศอ นาสิก เวชศาสตร์ฉุกเฉิน รพ.ศรีสังวาลย์","owner":"รพ.ศรีสังวาลย์","requested":757200.0,"approved":757200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-03-24","actual_spent":757200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":47,"name":"โครงการอบรมพยาบาลออร์โธปิดิกส์ หลักสูตรระยะสั้น 15 วัน เขตสุขภาพที่ 1 ของปีงบประมาณ 2566","owner":"รพ.แพร่","requested":413600.0,"approved":413600.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-06-06","actual_spent":413600.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ออร์โธปิดิกส์","fiscal_year":2566},{"id":48,"name":"โครงการพัฒนาจัดบริการสาธารณสุขในพื้นที่ทุรกันดาร จังหวัดแม่ฮ่องสอน","owner":"สสจ.แม่ฮ่องสอน","requested":1193500.0,"approved":1193500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-05","actual_spent":1193500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":49,"name":"โครงการดูงานศูนย์บริจาคอวัยวะและการปลูกถ่าย (รพ.อุดรธานี)","owner":"รพ.เชียงรายฯ","requested":41000.0,"approved":41000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-07-18","actual_spent":41000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ศัลยกรรม","fiscal_year":2566},{"id":50,"name":"โครงการอบรมเชิงปฏิบัติการการพัฒนาระบบ และคุณภาพส่งต่อผู้ป่วยกลุ่มโรคสำคัญ เขตสุขภาพที่ 1","owner":"รพ.ลำปาง","requested":119000.0,"approved":119000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-08-09","actual_spent":119000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":51,"name":"โครงการนิเทศติดตามการพัฒนาเครือข่าย Trauma and Emergency เขตสุขภาพที่ 1 ประจำปี 2566","owner":"รพ.ลำปาง","requested":51200.0,"approved":51200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-08-09","actual_spent":51200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"Trauma","fiscal_year":2566},{"id":52,"name":"พัฒนา Node ในล้านนา 1 (รพ.ลี้ 24,000 / รพ.ป่าซาง 2,001,692.45 บาท)","owner":"รพ.ลี้ 24,000 / รพ.ป่าซาง 2,001,692.45 บาท","requested":2025692.45,"approved":2025692.45,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-24","actual_spent":2025692.45,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":53,"name":"แม่ฮ่องสอน(เคมีบำบัด ศรีสังวาลย์)","owner":"รพ.ศรีสังวาลย์","requested":1700000.0,"approved":1700000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":1700000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคมะเร็ง","fiscal_year":2566},{"id":54,"name":"โครงการขอแพทย์ขาดแคลนสาขาสูตินรีเวชวิทยา รพ.ศรีสังวาลย์ (2 เดือน)","owner":"รพ.ศรีสังวาลย์","requested":246400.0,"approved":246400.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-09-20","actual_spent":246400.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แม่และเด็ก","fiscal_year":2566},{"id":55,"name":"โครงการพัฒนาศักยภาพการให้บริการ รพ.สันป่าตอง","owner":"รพ.สันป่าตอง","requested":6110000.0,"approved":6110000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":6110000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":56,"name":"โครงการพัฒนาระบบบริการสุขภาพสาขาประสาทศัลยศาสตร์ รพ.เกาะคา (ใช้เงินที่ฝาก รพ.เกาะคา 1.5 ลบ.)","owner":"รพ.เกาะคา (เงินรพ.1.5+เงินสนข.3.5)","requested":5000000.0,"approved":5000000.0,"funding_source":"สำนักงานเขตฯ 3.5 ลบ.\nรพ.เกาะคา 1.5 ลบ.","transfer_date":"2023-10-12","actual_spent":5000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ศัลยกรรมประสาท","fiscal_year":2566},{"id":57,"name":"โครงการประชุมเชิงปฏิบัติการ ระบบการดูแลผู้ป่วยจิตเวชและยาเสพติดที่มีความเสี่ยงสูงต่อการก่อความรุนแรง (V-Care) ในเขตสุขภาพที่ 1","owner":"รพ.สวนปรุง (Service Plan สุขภาพจิตและจิตเวช)","requested":240000.0,"approved":240000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-12","actual_spent":240000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":58,"name":"โครงการประชุมคณะกรรมการ Service Plan ติดตามผลการดำเนินงานด้านสุขภาพจิตและจิตเวช เขตสุขภาพที่ 1","owner":"รพ.สวนปรุง (Service Plan สุขภาพจิตและจิตเวช)","requested":20000.0,"approved":20000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-12","actual_spent":20000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"สุขภาพจิตและจิตเวช","fiscal_year":2566},{"id":59,"name":"โครงการประชุมคณะกรรมการขับเคลื่อนประเด็นมุ่งเน้นเขตสุขภาพที่ 1 ประจำปีงบประมาณ 2567","owner":"รพ.ลำพูน/ศูนย์อนามัยที่ 1 (Service Plan แม่และเด็ก)","requested":19000.0,"approved":19000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":19000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":60,"name":"โครงการพัฒนาศักยภาพบุคลากรด้านอนามัยแม่และเด็ก (Work shop)\n: ประชุมวิชาการประจำปี 2567 “Advanced life support in obstetrics and Pediatrics (ALSOP)”","owner":"รพ.ลำพูน/ศูนย์อนามัยที่ 1 (Service Plan แม่และเด็ก)","requested":215200.0,"approved":215200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":215200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แม่และเด็ก","fiscal_year":2566},{"id":61,"name":"โครงการพัฒนาสื่อโปสเตอร์ประชาสัมพันธ์ “NCD ไม่มีท้อง”","owner":"รพ.ลำพูน/ศูนย์อนามัยที่ 1 (Service Plan แม่และเด็ก)","requested":30000.0,"approved":30000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":30000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2566},{"id":62,"name":"โครงการพัฒนาศักยภาพ รพ.แม่วาง","owner":"รพ.แม่วาง","requested":3900000.0,"approved":3900000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":3900000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":63,"name":"โครงการพัฒนาศักยภาพ ซื้อเครื่องส่องตรวจลำไส้ใหญ่ รพ.ฝาง","owner":"รพ.ฝาง","requested":3800000.0,"approved":3800000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-12","actual_spent":3800000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":64,"name":"โครงการกองทุนอาหารเสริมทางการแพทย์ในผู้ป่วยวัณโรคยากไร้ที่มีภาวะทุพโภชนาการ เขตสุขภาพที่ 1 (4,500,000)","owner":"รพ.เชียงรายฯ - Service Plan วัณโรค","requested":4500000.0,"approved":2998800.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":2998800.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"วัณโรค","fiscal_year":2566},{"id":65,"name":"โครงการสนับสนุนแพทย์ขาดแคลน รพ.ศรีสังวาลย์","owner":"รพ.ศรีสังวาลย์","requested":3281420.0,"approved":446760.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-10-06","actual_spent":446760.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":66,"name":"โครงการนำเสนอวิชาการ 2566 ยกระดับสาธารณสุขไทยเพื่อสุขภาพที่ดีอย่างยั่งยืน- สสจ.น่าน","owner":"สสจ.น่าน","requested":79800.0,"approved":79800.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2023-09-20","actual_spent":79800.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":67,"name":"สนับสนุนสำนักงานเขตสุขภาพที่ 1","owner":"สำนักงานเขตฯ","requested":0,"approved":1414861.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":1414861.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":68,"name":"สนับสนุนสำนักงานเขตสุขภาพที่ 1","owner":"สำนักงานเขตฯ","requested":0,"approved":953018.35,"funding_source":"","transfer_date":"","actual_spent":953018.35,"remaining":0,"status":"","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2566},{"id":1,"name":"อาคารชุดครอบครัว 24 ครอบครัว รพ.เทพรัตน์ฯ","owner":"รพ.เทพรัตน์/สสจ.เชียงใหม่","requested":14167000.0,"approved":14167000.0,"funding_source":"รพ.นครพิงค์=4,167,000,\nรพ.เชียงรายฯ=5,000,000,\nรพ.ลำปาง=5,000,000","transfer_date":"","actual_spent":14167000.0,"remaining":0.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"!!Update ณ 6 พ.ย. 2568\n- อาคารพักแพทย์ 2 ชั้น 8 ยูนิต 16 ห้อง อุทรธ์ผู้ชนะ  รอเรียกเซ็นสัญญา  (300 วัน)\n- กรมทหารช่างอยู่ระหว่างออกแบบ ทำแนวกั้นดินสไลด์ (เดิม สบส. ทำแบบมาอยู่ที่ 10 ล้านบาท ซึ่งเกินงบประมาณที่เหลืออยู 7.079 ล้านบาท)\n\n- 21 ก.พ. 68 รองปลัดตามงาน   ติดตามงาน   ปรับ แผน สร้างแฟลต 1 หลัง พร้อมกำแพงกันดิน  ส่งเอกสาร เปลี่ยนแปลงวัตถุประสงค์ 10 กพ 68  ยังไม่ได้ตอบรับ   ปัจจุบัน ปรับปรุงที่ ก่อสร้าง","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":2,"name":"โครงการขับเคลื่อนอำเภอสุขภาพดี ส่งเสริม ป้องกัน รอบรู้เท่าทัน โรคไตเรื้อรัง อย่างยั่งยืน: Lanna Health Package Model","owner":"รพ.นครพิงค์","requested":1000000.0,"approved":1000000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":719882.0,"remaining":280118.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"- 9 เม.ย. 68 ทำเรื่องขอขยายโครงการถึง มี.ค.68   ขอขยายโครงการเพิ่ม กย 68 //\n - 30 เม.ย. 68 เหลือขั้นตอนสุดท้าย เนื่องจากต้องทิ้งระยะเวลาจากการตรวจเลือด","budget_category":"โรคไต","fiscal_year":2567},{"id":3,"name":"โครงการพัฒนาระบบการตรวจคัดกรองมะเร็งปอดด้วย Low dose CT นำร่อง เขตสุขภาพที่ 1","owner":"รพ.เชียงรายฯ","requested":5000000.0,"approved":5000000.0,"funding_source":"รพ.เชียงราย","transfer_date":"","actual_spent":4215000.0,"remaining":785000.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"*คงเหลือกิจกรรมรอเบิกจ่าย ประชุม คทง. / ประชุมอบรม / จ้างวิเคราะห์ข้อมูล+ทำคู่มือ\n - 9 เม.ย. 68 แจ้งให้เจ้าของโครงการรายงานผลการดำเนินงาน (ดำเนินการเสร็จสิ้นแล้ว)\n - 13 พ.ค. 68 รอสรุปผลแจ้งมายังสำนักงานเขตฯ","budget_category":"โรคมะเร็ง","fiscal_year":2567},{"id":4,"name":"ช่วยเหลืออุทกภัย เชียงราย พะเยา แพร่ น่าน แห่งละ 500,000 บาท","owner":"สสจ.เชียงราย / สสจ.พะเยา / สสจ.แพร่ / สสจ.น่าน","requested":2000000.0,"approved":2000000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"สนับสนุนทั้งจำนวน","budget_category":"นโยบายผู้บริหาร(ภัยพิบัติ)","fiscal_year":2567},{"id":5,"name":"ปรับปรุงห้องพักแพทย์ รพ.ศรีสังวาลย์","owner":"รพ.ศรีสังวาลย์","requested":5000000.0,"approved":5000000.0,"funding_source":"รพ.น่าน","transfer_date":"","actual_spent":4170000.0,"remaining":830000.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"งานพัสดุ 052049669 ต่อ 162\n- 9 เม.ย. 68 ประกาศผู้ชนะแล้ว >\n- 13 พ.ค. 68 จะเรียกทำสัญญาวันที่ 15 พ.ค. 68\n- เบิกจ่ายงวดที่ 2 ไปแล้ว\nงวด 1 = 2,085,000 \nงวด 2 = 1,972,410 (มีค่าปรับ)","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":6,"name":"สนับสนุนค่าตอบแทนแพทย์ที่ไปช่วยปฏิบัติงาน รพ.ศรีสังวาลย์ (ฮอมบุญx3)","owner":"รพ.ศรีสังวาลย์","requested":4907520.0,"approved":4907520.0,"funding_source":"รพ.น่าน","transfer_date":"","actual_spent":2719520.0,"remaining":2188000.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"- 9 มี.ค. 68 ให้ถามว่าใชเงินไปเท่าไหร่ ที่เหลือ จะเรียกเงินคืน  //รอเอกสารทางการเงิน สำหรับเบิกจ่าย คาดจ่ายภายในเดือน กุมภาพันธ์\n - 13 พ.ค. 68 ยังไม่มีการเบิกเพิ่ม\n - รายงานผลการเบิกจ่าย พร้อมขอเงินเพิ่มอีก 2,000,000 บาท สำหรับปีงบ 2569 ตามหนังสือ มส 0033.201/1999 ลว 9 ก.ย. 68","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":7,"name":"โครงการสนับสนุนชุดดูแลสุขภาพประชาชนเบื้องต้น สำหรับอาสาสมัครประ\nจำหมู่บ้านในการดูแลสุขภาพประชาชน จังหวัดเชียงราย ประจำปีงบประมาณ พ.ศ.2568 สสจ.เชียงราย","owner":"สสจ.เชียงราย","requested":500000.0,"approved":500000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"รอพี่บานเย็นตามความคืบหน้าดำเนินการ","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":8,"name":"โครงการสนับสนุนชุดดูแลสุขภาพประชาชนเบื้องต้น สำหรับอาสาสมัครประ\nจำหมู่บ้านในการดูแลสุขภาพประชาชน จังหวัดพะเยา ประจำปีงบประมาณ พ.ศ.2568 สสจ.พะเยา","owner":"สสจ.พะเยา","requested":500000.0,"approved":500000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"รอพี่บานเย็นตามความคืบหน้าดำเนินการ","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":9,"name":"โครงการสนับสนุนชุดดูแลสุขภาพประชาชนเบื้องต้น สำหรับอาสาสมัครประ\nจำหมู่บ้านในการดูแลสุขภาพประชาชน จังหวัดแพร่ ประจำปีงบประมาณ พ.ศ.2568 สสจ.แพร่","owner":"สสจ.แพร่","requested":500000.0,"approved":500000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"รอพี่บานเย็นตามความคืบหน้าดำเนินการ","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":10,"name":"พัฒนาศักยภาพผู้นิเทศตรวจราชการ\n> ใช้จริง โครงการประชุมเชิงปฏิบัติการ ขับเคลื่อนแผนยุทธศาสตร์ เขตสุขภาพที่ 1 ปีงบประมาณ 2567 (รร.ปานวิมาน)","owner":"สำนักงานเขตฯ\n- งานยทธศาสตร์","requested":400000.0,"approved":400000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"20/11/2567 = 50,800+120,800\n2/12/2567 = 10,000","actual_spent":181600.0,"remaining":218400.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"ยืนยันยอดกับงานการเงินแล้ว","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":11,"name":"สรุปตรวจราชการ เขตสุขภาพที่ 1 ประจำปีงบประมาณ 2567\n> ใช้จริง โครงการสรุปตรวจราชการ เขตสุขภาพที่ 1 ประจำปีงบประมาณ 2567","owner":"สำนักงานเขตฯ\n- งานยุทธศาสตร์","requested":387870.0,"approved":387870.0,"funding_source":"รพ.นครพิงค์","transfer_date":"29/9/2567 = 259,547\n2/12/2567 = 5,000","actual_spent":264547.0,"remaining":123323.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"ยืนยันยอดกับงานการเงินแล้ว","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":12,"name":"ชดเชยค่ารักษาพยาบาลในการทำหัตถการสอดสายสวนหลอดเลือดแดงเพื่อดูดลากลิ่นเลือด (Mechanical Thrombectomy) ในผู้ป่วยโรคหลอดเลือดสมองขนาดใหญ่ตีบอุดตัน เขตสุขภาพที่ 1 ปีงบประมาณ 2567","owner":"รพ.เชียงรายฯ","requested":3000000.0,"approved":3000000.0,"funding_source":"รพ.เชียงราย","transfer_date":"","actual_spent":3000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"จำนวน 100 เคส * 30,000/เคส","budget_category":"โรคหลอดเลือดสมอง","fiscal_year":2567},{"id":13,"name":"ผ่าตัดปลูกถ่ายไต โรงพยาบาลนครพิงค์ปีงบประมาณ 2567","owner":"รพ.นครพิงค์","requested":1500000.0,"approved":1500000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":1406000.0,"remaining":94000.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"รอพี่บานเย็นตามความคืบหน้าดำเนินการ","budget_category":"โรคไต","fiscal_year":2567},{"id":14,"name":"ปรังปรุงบ้านพักข้าราชการระดับ 5-6 (บ้านพักผู้อำนวยการ) รพ.ดอยสะเก็ด","owner":"รพ.ดอยสะเก็ด","requested":500000.0,"approved":500000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"ทำสัญญา 4 ก.พ. > เริ่มปรับปรุง 10 ก.พ. > แล้วเสร็จ 25 เม.ย. *ดำเนินการเสร็จสิ้นแล้ว","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":15,"name":"ปรับปรุงภูมิทัศน์  รพ.พร้าว","owner":"รพ.พร้าว","requested":490000.0,"approved":490000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":490000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"- 9 เม.ย. 68 ตรวจรับงานก่อสร้าง งวด 1 เรียบร้อย // \n - 30 เม.ย. ส่งมอบงวดที่ 3  รอ คกก.ตรวจรับ 9 พ.ค. 68 (เนื่องจาก คกก.ติดเตรียมงาน HA) ข้อมูลจากคุณแหม่มพัสดุ\n - 13 พ.ค. 68 รอ คกก.ตรวจรับในวันที่ 14 พ.ค. 68","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":16,"name":"ก่อสร้างถนนแอลฟัลติกซีเมนต์ รพ.สต.ดงพญา อำเภอบ่อเกลือ","owner":"รพ.สต.ดงพญา","requested":468000.0,"approved":468000.0,"funding_source":"รพ.น่าน","transfer_date":"","actual_spent":468000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"จัดทำ PO แล้ว\n - 13 พ.ค. 68 ดำเนินการเสร็จสิ้น ไม่มีเงินเหลือ","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":17,"name":"พัฒนาระบบสุขภาพ เขตสุขภาพที่ 1 (สสอ.ไชยปราการ)","owner":"สสอ.ไชยปราการ","requested":487000.0,"approved":487000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":487000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"0","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":18,"name":"ก่อสร้างบ้านพักสาธารณสุขอำเภอบ่อเกลือ *","owner":"สสอ.บ่อเกลือ","requested":1353000.0,"approved":1353000.0,"funding_source":"รพ.น่าน","transfer_date":"","actual_spent":1353000.0,"remaining":0.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"- 9 เม.ย. 68 ขั้นตอนหลังประกาศ      \n - 13 พ.ค. 68 อยู่ระหว่างดำเนินการก่อสร้าง","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":19,"name":"โครงการบูรณาการการมีส่วนร่วมเพื่อพัฒนาพื้นที่ระดับอำเภอสู่จังหวัดปลอดโรคพิษสุนัขบ้า ปี 2567","owner":"สคร.1","requested":26200.0,"approved":26200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-03-26","actual_spent":26200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"ประสาน สคร.1 แล้ว (มี 3 โครงการที่ประสานไป)","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2567},{"id":20,"name":"โครงการประชุมราชการเพื่อการมีส่วนร่วมพัฒนาพื้นที่ระดับอำเภอสู่จังหวัดปลอดโรคพิษสุนัขบ้า ปีงบประมาณ พ.ศ.2567 พื้นที่จังหวัดน่าน","owner":"สสจ.น่าน","requested":11900.0,"approved":11900.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-03-27","actual_spent":11900.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2567},{"id":21,"name":"โครงการประชุมเชิงปฏิบัติการถ่ายทอดความรู้เพื่อสนับสนึนการสร้างและประเมินพื้นที่ปลอดโรคพิษสุนัขบ้า ปีงบประมาณ 2567 จังหวัดลำพูน","owner":"สสจ.ลำพูน","requested":23500.0,"approved":23500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-04-27","actual_spent":23500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2567},{"id":22,"name":"โครงการพัฒนาระบบบริการการแพทย์ฉุกเฉิน และ ECS คุณภาพ","owner":"รพ.ลำปาง","requested":22350.0,"approved":22350.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-08-13","actual_spent":22350.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน","fiscal_year":2567},{"id":23,"name":"การประชุมเชิงปฏิบัติการ การดูแลทารกแรกเกิด การส่งต่อทารกแรกเกิดอย่างปลอดภัย และการกู้ชีพทารกแรกเกิด (NCPR) เขตสุขภาพที่ 1","owner":"รพ.ลำปาง","requested":171000.0,"approved":171000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-08-14","actual_spent":171000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แม่และเด็ก","fiscal_year":2567},{"id":24,"name":"โครงการอบรมปฐมนิเทศ ข้าราชการบรรจุใหม่ (สายแพทย์ ทันตแพทย์) ระหว่างวันนที่ 13-14 พ.ค. 67","owner":"สำนักงานเขตสุขภาพที่ 1 \n- งานบริหารทรัพยากรบุคคล","requested":450000.0,"approved":450000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-05-08","actual_spent":393480.0,"remaining":56520.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":25,"name":"โครงการประชุมเชิงปฏิบัติการพัฒนาบุคลากรและการซ้อมแผนลำเลียงผู้ป่วยทางอากาศยานในพื้นที่ทุรกันดารห่างไกล จังหวัดน่าน (เดิมขอใช้ 799,200 แต่ปรับโดยแยกไปใช้ในอีก 2 โครงการ)","owner":"รพ.น่าน","requested":253966.0,"approved":253966.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2566-12-22","actual_spent":253966.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน","fiscal_year":2567},{"id":26,"name":"โครงการพัฒนาศักยภาพบุคลากรตำแหน่ง รองนายแพทย์สาธารณสุขจังหวัดและรองผู้อำนวยการโรงพยาบาล ปีงบประมาณ 2567 (Start Up ที่ รร.แคนทารี่)","owner":"รพ.น่าน","requested":321000.0,"approved":321000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2566-12-22","actual_spent":195010.0,"remaining":125990.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":27,"name":"โครงการเผยแพร่นวัตกรรมสุขภาพอย่างยั่งยืน สู่การยกระดับบริการสาธารณสุขยุคดิจิทัล 2567 (จัดบูธ)","owner":"รพ.น่าน","requested":224234.0,"approved":224234.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2566-12-22","actual_spent":197720.3,"remaining":26513.70000000001,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":28,"name":"โครงการพัฒนาการดูแลผู้สูงอายุที่มีภาวะพึ่งพิงและผู้ป่วยระยะสุดท้าย เขตสุขภาพที่ 1 ประจำปีงบประมาณ พ.ศ. 2567","owner":"รพ.ลำพูน\nService Plan ผู้สูงอายุ","requested":180300.0,"approved":180300.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-05-16","actual_spent":180300.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ผู้สูงอายุ","fiscal_year":2567},{"id":29,"name":"โครงการประชุมเชิงปฏิบัติการทบทวนและจัดทำแผนยุทธศาสตร์เขตสุขภาพที่ 1 ปีงบประมาณ พ.ศ. 2567 (เชียงของ)","owner":"สำนักงานเขตสุขภาพที่ 1 \n- งานยุทธศาสตร์","requested":420000.0,"approved":420000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-06-12","actual_spent":285355.0,"remaining":134645.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":30,"name":"โครงการฟื้นฟูศักยภาพบุคลากรด้านการส่งเสริมพัฒนาการเด็กปฐมวัย (DSPM/ TEDA4I) และสร้างความเข้มแข็งโรงเรียนพ่อแม่ใน Well Child Clinics เขตสุขภาพที่ 1","owner":"รพ.ลำพูน","requested":251990.0,"approved":251990.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-07-10","actual_spent":0.0,"remaining":251990.0,"status":"ยกเลิก-ใช้แหล่งเงินอื่นแล้ว","remarks":"ยกเลิก เพราะใช้แหล่งเงินอื่นดำเนินการแล้ว","budget_category":"แม่และเด็ก","fiscal_year":2567},{"id":31,"name":"โครงการพัฒนาศํกยภาพเครือข่ายระบบสุขภาพ service plan สาขามะเร็ง","owner":"รพ.ลำปาง","requested":30700.0,"approved":30700.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-09-18","actual_spent":28305.0,"remaining":2395.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"เรียกคืนมาแล้ว","budget_category":"โรคมะเร็ง","fiscal_year":2567},{"id":32,"name":"โครงการงานมหกรรมความสุขทางการเงินปละประชุมวิชาการเขตสุขภาพที่ 1 (Happy money Health Region1 Expo 2024)","owner":"รพ.ลำพูน","requested":118000.0,"approved":118000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-08-01","actual_spent":118000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":33,"name":"สนับสนุนจัดบูธกิจกรรม เมนูชูสุขภาพ อำเภอสุขภาพดี 8 จังหวัด (บูธ โอนให้ สสจ.ทั้ง 8 จังหวัด)","owner":"สำนักงานเขตสุขภาพที่ 1 \n- งานยุทธศาสตร์","requested":80000.0,"approved":80000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-09-20","actual_spent":80000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":34,"name":"ช่วยเหลืออุทกภัย รอบที่ 2 \nเหยี่ยวล้านนา = 1 ลบ. /\nอ.แม่อาย = 5 แสน /\nอ.แม่สาย = 5 แสน /\nอ.เมืองเชียงราย  = 5 แสน","owner":"(เหยี่ยวล้านนา = 1 ลบ. /\nอ.แม่อาย = 5 แสน /\nอ.แม่สาย = 5 แสน /\nอ.เมืองเชียงราย  = 5 แสน","requested":2500000.0,"approved":2500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-10-30","actual_spent":2500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร(ภัยพิบัติ)","fiscal_year":2567},{"id":35,"name":"โครงการถอดบทเรียนน้ำท่วม เขตสุขภาพที่ 1 (รร.เมอริเดียน จ.เชียงราย)","owner":"สสจ.เชียงราย","requested":320000.0,"approved":320000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-11-07","actual_spent":320000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":36,"name":"สื่อประชาสัมพันธ์ สร้างเสริมความรอบรู้ด้านสุขภาพและสร้างเสริมสุขภาพที่ดี \"ผู้พิทักษ์ปราบหวาน ลดเค็ม\" เขตสุขภาพที่ 1","owner":"สำนักงานเขตสุขภาพที่ 1 \n- งานยุทธศาสตร์","requested":55000.0,"approved":55000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"2567-12-02","actual_spent":55000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2567},{"id":37,"name":"โครงการประชาสัมพันธ์และนิทรรศการ \"ท่องเที่ยงเชิงสุขภาพภาพ\"\nKick Off - ท่าแพ (สำนักงานเขตฯ)","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CSO)","requested":490500.0,"approved":490500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-01-06","actual_spent":490500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":38,"name":"โครงการจ้างจัดทำสื่อประชาสัมพันธ์บันทึกสุขภาพดีเขตสุขภาพที่ 1\n \"บันทึกสุขภาพดีสุขภาพที่ 1\" (สำนักงานเขตฯ - กล่องของขวัญ)","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CSO)","requested":498400.0,"approved":498400.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-02-14","actual_spent":498400.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":39,"name":"โครงการวิเคราะห์ข้อมูล การถอดบทเรียนการเสริมสร้างความพร้อมรับมืออุทกภัยเขตสุขภาพที่ 1","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CSO)","requested":250000.0,"approved":250000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-02-17","actual_spent":250000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":40,"name":"โครงการประชุมเชิงปฏิบัติการเพื่อพัฒนาแผนงานบริหารจัดการทรัพยากรบุคคลเขตสุขภาพที่ 1","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานทรัพย์ (CHRO)","requested":65000.0,"approved":65000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-12-17","actual_spent":42680.0,"remaining":22320.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":41,"name":"โครงการพัฒนาศักยภาพยกระดับบริการตามนโยบายกระทรวงสาธารณสุขเขตสุขภาพที่ 1 (1,014,400)  จัด 3 ครั้ง","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CIO)","requested":283400.0,"approved":283400.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2567-12-17","actual_spent":149600.0,"remaining":133800.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":42,"name":"ประชุมเชิงปฏิบัติการแลกเปลี่ยนเรียนรู้การดำเนินงานตามนโยบายกระทรวงสาธารณสุข ปีงบประมาณ พ.ศ. 2568  ครั้งที่ 1 - จ.นครราชสีมา ( มกราคม 68 รพ.ปางช่อง นานา,สสอ.)","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CIO)","requested":278500.0,"approved":278500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"22/01/2568 = 111,200\n17/02/2568 = 30,000\n18/02/2568 = 10,000","actual_spent":151200.0,"remaining":127300.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":43,"name":"สสจ.เชียงใหม่","owner":"สสจ.เชียงใหม่","requested":2000000.0,"approved":2000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":44,"name":"รพ.จอมทอง","owner":"รพ.จอมทอง","requested":2000000.0,"approved":2000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":45,"name":"สสจ.น่าน","owner":"สสจ.น่าน","requested":4000000.0,"approved":4000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":4000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":46,"name":"รพ.ลำปาง","owner":"รพ.ลำปาง","requested":2000000.0,"approved":2000000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":1965499.0,"remaining":34501.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":47,"name":"สสจ.ลำปาง","owner":"สสจ.ลำปาง","requested":2000000.0,"approved":2000000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":48,"name":"สสจ.พะเยา","owner":"สสจ.พะเยา","requested":2000000.0,"approved":2000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":49,"name":"สสจ.แม่ฮ่องสอน","owner":"สสจ.แม่ฮ่องสอน","requested":2000000.0,"approved":2000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":50,"name":"สสจ.แพร่","owner":"สสจ.แพร่","requested":2000000.0,"approved":2000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-21","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":51,"name":"สสจ.ลำปาง โครงการ Kick Off รักษ์ไต - ใข้เงินโครงการรักษ์ไต","owner":"สสจ.ลำปาง","requested":1149000.0,"approved":1149000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-05-29","actual_spent":1149000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไต","fiscal_year":2567},{"id":52,"name":"โครงการการอบรมการพัฒนาบุคลากรในการสื่อสารอย่างเห็นอกเห็นใจและภาพลักษณ์ เพื่อความเชื่อมั่นต่อโรงพยาบาลเขตสุขภาพที่ 1","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มสารนิเทศ","requested":811800.0,"approved":811800.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-03-20","actual_spent":766715.0,"remaining":45085.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":53,"name":"โครงการอาคารสุขสันต์รู้ทัน NCD - สสอ.เชียงกลาง จ.น่าน","owner":"สสอ.เชียงกลาง","requested":1800000.0,"approved":1800000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-07-22","actual_spent":1800000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2567},{"id":54,"name":"โครงการอบรม สสอ. ร่วมกับ กรมอนามัย รร.ดิเอ็มเพลส","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CSO)","requested":1000000.0,"approved":1000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"2568-04-29","actual_spent":824687.0,"remaining":175313.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":55,"name":"สนับสนุน สำนักงานเขตสุขภาพที่ 1","owner":"สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ","requested":6417036.7,"approved":6417036.7,"funding_source":"สำนักงานเขตฯ=2,104,217.7\nรพ.นครพิงค์=2,000,000\nรพ.ลำปาง=1,800,000\nรพ.น่าน=512,819","transfer_date":"","actual_spent":6417036.7,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2567},{"id":1,"name":"แผนแก้ไขปัญหาสุขภาพประชาชนในสถานการณ์วิกฤติฉุกเฉินและนโยบายเร่งด่วน เขตสุขภาพที่ 1 (ไข้เลือดออก 8 แสน + N95 1.5 ล้าน)","owner":"สำนักงานเขต","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":0.0,"remaining":100000.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":2,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.ลำปาง","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":3,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.แพร่","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":4,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.พะเยา","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":5,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.แม่ฮ่องสอน","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":6,"name":"สนับสนุนซื้อหน้ากากอนามัย ป้องกัน PM 2.5  (จ.แพร่) 500,000 บาท","owner":"สสจ.แพร่","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร-PM 2.5","fiscal_year":2568},{"id":7,"name":"สนับสนุนซื้อหน้ากากอนามัย ป้องกัน PM 2.5  (จ.พะเยา) 500,000 บาท","owner":"สสจ.พะเยา","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร-PM 2.5","fiscal_year":2568},{"id":8,"name":"สนับสนุนซื้อหน้ากากอนามัย ป้องกัน PM 2.5  (จ.แม่ฮ่องสอน) 500,000 บาท","owner":"สสจ.แม่ฮ่องสอน","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร-PM 2.5","fiscal_year":2568},{"id":9,"name":"สนับสนุนซื้อหน้ากากอนามัย ป้องกัน PM 2.5 ของสำนักงานเขตฯ 500,000    (ให้ทีม Logistic จ.ลำปาง ดำเนินการในนาม EOC เขตฯ)","owner":"สสจ.ลำปาง","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร-PM 2.5","fiscal_year":2568},{"id":10,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.เชียงใหม่","requested":100000.0,"approved":100000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":11,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.เชียงราย","requested":100000.0,"approved":100000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":0.0,"remaining":100000.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":12,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.ลำพูน","requested":100000.0,"approved":100000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":13,"name":"งานควบคุมโรคไข้เลือดออก จังหวัดละ 100,000 บาท","owner":"สสจ.น่าน","requested":100000.0,"approved":100000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ควบคุมโรคติดต่อ","fiscal_year":2568},{"id":14,"name":"สนับสนุนและนำเสนอผลงาน best practice plan เขตสุขภาพที่ 1","owner":"สนงเขต (CSO)","requested":50000.0,"approved":50000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":50000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":15,"name":"ประชุมคณะกรรมการบริหารเขตสุขภาพที่ 1","owner":"สนงเขต (CIO)","requested":320000.0,"approved":320000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":146139.4,"remaining":173860.6,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":16,"name":"ประชุมเชิงปฏิบัติการแลกเปลี่ยนเรียนรู้การดำเนินงานตามนโยบายกระทรวงสาธารณสุข (ประชุมนอกสถานที่รายไตรมาส) * แลกเปลี่ยนเรียนรู้ ศรีสะเกษ และเขตฯ 1","owner":"สนงเขต (CIO)","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":17,"name":"ประชุมคณะอนุกรรมการบริหารการเงินการคลัง เขตสุขภาพที่ 1","owner":"สนงเขต (CFO)","requested":53200.0,"approved":53200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":47270.0,"remaining":5930.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":18,"name":"-โครงการประชุมเชิงปฏิบัติการ หลักสูตรการวิจัย (ชช-นวก.สาธารณสุข) > ใช้จากวงเงิน 2.5 ลบ.","owner":"สนงเขต (CHRO)","requested":820050.0,"approved":820050.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":820050.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":19,"name":"พัฒนาศักยภาพ start up","owner":"สนงเขต (CHRO)","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":145390.0,"remaining":354610.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":20,"name":"ปฐมนิเทศข้าราชการบรรจุใหม่","owner":"สนงเขต (CHRO)","requested":352730.0,"approved":352730.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":352730.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":21,"name":"ประชุมพิจารณาผลงานทางวิชาการ(ค่าตอบแทนอ่านผลงานวิชาการ)","owner":"สนงเขต (CHRO)","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":31540.0,"remaining":68460.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":22,"name":"โครงการสื่อประชาสัมพันธ์ (สารนิเทศ) = วงเงินรวม 5 ลบ.","owner":"สนงเขต (สารนิเทศ)","requested":1500000.0,"approved":1500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":999320.0,"remaining":500680.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":23,"name":"คู่มือNCD Prevention + รักษ์ไต(สมุดบันทึกสุขภาพไตเรื้อรัง)","owner":"สนงเขต (สารนิเทศ)","requested":1000000.0,"approved":1000000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":0.0,"remaining":1000000.0,"status":"อยู่ระหว่างดำเนินการ","remarks":"อยู่ระหว่างงขยายโครงการ ทำการจัดซื้อจัดจ้าง = 489,000 บาท","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":24,"name":"โครงการสรุปตรวจราชการ ครั้งที่ 1 ปี 2568","owner":"กองตรวจราชการ","requested":300000.0,"approved":300000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":215981.0,"remaining":84019.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":25,"name":"โครงการพัฒนาน้ำพุร้อนไทย สู่การเป็นแหล่งท่องเที่ยวเชิงสุขภาพ","owner":"สสจ.เชียงใหม่","requested":281200.0,"approved":281200.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":281200.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":26,"name":"โครงการอบรมเชิงปฏิบัติการพัฒนาศักยภาพบุคลากรแพทย์ และ พยาบาลด้านสูติกรรม","owner":"รพ.ลำปาง-SP สุขภาพกลุ่มวัย","requested":300000.0,"approved":300000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":260700.0,"remaining":39300.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"แม่และเด็ก","fiscal_year":2568},{"id":27,"name":"2.ระบบทีม Sky doctor เชียงใหม่ (อุปกรณ์ป้องกันรายบุคคลและอุปกรณ์สื่อสารในอากาศยาน 2 หน่วย)","owner":"รพ.นครพิงค์-SP อุบัติเหตุ และ ฉุกเฉิน","requested":616320.0,"approved":616320.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":616320.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน-EMS","fiscal_year":2568},{"id":28,"name":"โครงการ จัดตั้งศูนย์ SOC ระดับเขต/จังหวัด ของเขตสุขภาพที่ 1 (R1HealthSOC)","owner":"คกก.cio สำนักงานเขตฯ","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":242600.0,"remaining":257400.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":29,"name":"สนับสนุนการประกวดพื้นที่ต้นแบบดีเด่นชมรมผู้สูงอายุด้านการแพทย์แผนไทย","owner":"SP แพทย์แผนไทย สสจ.ลำปาง","requested":50000.0,"approved":50000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":50000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"ผู้สูงอายุ","fiscal_year":2568},{"id":30,"name":"สสจ.แม่ฮ่องสอน (ให้ 17.5 ล้านบาท = 12.5 ล้านจากงบเขตฯปี68 + 5ล้านจากปี 67 สนับสนุนแพทย์ฮอมบุญ รพ.ศรีสังวาลย์)","owner":"สสจ.แม่ฮ่องสอน","requested":12500000.0,"approved":12500000.0,"funding_source":"รพ.นครพิงค์=7,500,000\nรพ.เชียงรายฯ=5,000,000","transfer_date":"","actual_spent":12500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":31,"name":"สสจ.แพร่  -> สนับสนุนการพัฒนา","owner":"สสจ.แพร่","requested":7500000.0,"approved":7500000.0,"funding_source":"รพ.แพร่","transfer_date":"","actual_spent":7500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":32,"name":"สสจ.น่าน  -> สนับสนุนการพัฒนา","owner":"สสจ.น่าน","requested":5000000.0,"approved":5000000.0,"funding_source":"รพ.แพร่","transfer_date":"","actual_spent":5000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":33,"name":"โครงการพัฒนาศักยภาพ อสม. เพื่อส่งเสริม ป้องกัน รอบรู้ เท่าทันโรคเรื้อรังอย่างยั่งยืน ปี 2568 (สสจ.เชียงใหม่)","owner":"สสอ.เมืองเชียงใหม่","requested":100000.0,"approved":100000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":100000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":34,"name":"โครงการของขวัญประชาชน ของคณะกรรมการคู่สมรสคณะรัฐมนตรีจังหวัดเชียงราย ครั้งที่ 3","owner":"สสจ.เชียงราย","requested":244500.0,"approved":244500.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":244500.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":35,"name":"ประชุมเชิงปฏิบัติการและเตรียมความพร้อมรับมือและตอบโต้ภาวะฉุกเฉินทางการแพทย์ เฉพาะพื้นที่ชายแดน อำเภอแม่สาย","owner":"สสอ.แม่สาย","requested":500000.0,"approved":500000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"การแพทย์ฉุกเฉิน-EMS","fiscal_year":2568},{"id":36,"name":"สรุปตรวจราชการฯ รอบ 2 ปีงบประมาณ 2568","owner":"สำนักงานเขตฯ","requested":620000.0,"approved":620000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":432570.0,"remaining":187430.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":37,"name":"สนับสนุนการจัดการบริการ + NCD สสจ.น่าน","owner":"สสจ.น่าน","requested":10000000.0,"approved":10000000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":10000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":38,"name":"สนับสนุนการจัดการบริการ + NCD สสจ.แพร่","owner":"สสจ.แพร่","requested":10000000.0,"approved":10000000.0,"funding_source":"รพ.นครพิงค์=2,500,000\nรพ.แพร่=7,500,000","transfer_date":"","actual_spent":10000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":39,"name":"สนับสนุนการจัดการบริการ + NCD สสจ.แม่ฮ่องสอน","owner":"สสจ.แม่ฮ่องสอน","requested":6000000.0,"approved":6000000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":6000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":40,"name":"สนับสนุนการจัดการบริการ + NCD สสจ.พะเยา","owner":"สสจ.พะเยา","requested":2000000.0,"approved":2000000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":2000000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":41,"name":"สนับสนุนการจัดการบริการ + NCD รพ.นครพิงค์","owner":"รพ.นครพิงค์","requested":2400000.0,"approved":2400000.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":2400000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":42,"name":"- สสอ. ในจังหวัดเชียงใหม่ 25  แห่ง","owner":"สสอ.จังหวัดเชียงใหม่","requested":1250000.0,"approved":1250000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":1250000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":43,"name":"- สสอ. ในจังหวัดเชียงราย 18  แห่ง","owner":"สสอ.จังหวัดเชียงราย","requested":950000.0,"approved":950000.0,"funding_source":"รพ.เชียงรายฯ=850,000\nรพ.ลำปาง=100,000","transfer_date":"","actual_spent":950000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":44,"name":"- สสอ. ในจังหวัดน่าน 15 แห่ง","owner":"สสอ.จังหวัดน่าน","requested":750000.0,"approved":750000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":750000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":45,"name":"- สสอ. ในจังหวัดลำปาง 13 แห่ง","owner":"สสอ.จังหวัดลำปาง","requested":650000.0,"approved":650000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":650000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":46,"name":"- สสอ. ในจังหวัดพะเยา 9 แห่ง","owner":"สสอ.จังหวัดพะเยา","requested":450000.0,"approved":450000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":450000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":47,"name":"- สสอ. ในจังหวัดแพร่ 8 แห่ง","owner":"สสอ.จังหวัดแพร่","requested":400000.0,"approved":400000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":400000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":48,"name":"- สสอ. ในจังหวัดลำพูน 8 แห่ง","owner":"สสอ.จังหวัดลำพูน","requested":400000.0,"approved":400000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":400000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":49,"name":"- สสอ. ในจังหวัดแม่ฮ่องสอน 7 แห่ง","owner":"สสอ.จังหวัดแม่ฮ่องสอน","requested":350000.0,"approved":350000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":350000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":50,"name":"โครงการเชิงปฏิบัติการ สสอ. เขตสุขภาพที่ 1","owner":"สสอ.เชียงราย(เจ้าภาพ)","requested":498600.0,"approved":498600.0,"funding_source":"รพ.นครพิงค์","transfer_date":"","actual_spent":498600.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":51,"name":"สนับสนุน รพ.พาน (ทางเชื่อมอาคารรังสีกับอาคารผู้ป่วยนอก)","owner":"รพ.พาน","requested":800000.0,"approved":800000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":800000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":52,"name":"สนับสนุน รพ.ดอยหลวง (ขยายบริการสุขภาพทางการแพทย์)","owner":"รพ.ดอยหลวง","requested":500000.0,"approved":500000.0,"funding_source":"รพ.ลำปาง","transfer_date":"","actual_spent":500000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":53,"name":"สนับสนุน สสอ.เชียงแสนเพิ่มอีก 50,000","owner":"สสอ.เชียงแสน","requested":50000.0,"approved":50000.0,"funding_source":"รพ.เชียงรายฯ","transfer_date":"","actual_spent":50000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568},{"id":54,"name":"สสจ.ลำปาง ขอรับสนับสนุนงบฯ สำหรับโครงการ NCD","owner":"สสจ.ลำปาง","requested":3700000.0,"approved":3700000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":3700000.0,"remaining":0.0,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"โรคไม่ติดต่อเรื้อรัง","fiscal_year":2568},{"id":55,"name":"ค่าจ้างเหมาบุคลากรสนับสนุนภารกิจ ผู้บริหารเขตสุขภาพ (8 เดือน)","owner":"สนงเขต (CHRO)","requested":240000.0,"approved":240000.0,"funding_source":"สำนักงานเขตฯ","transfer_date":"","actual_spent":159596.77,"remaining":80403.23000000001,"status":"ดำเนินการแล้วเสร็จ","remarks":"","budget_category":"นโยบายผู้บริหาร","fiscal_year":2568}],"service_units":[{"code":"41106","name":"สำนักงานเขตสุขภาพที่ 1","level":"สำนักงานเขตสุขภาพ","province":"เชียงใหม่","suspended":false},{"code":"37","name":"สำนักงานสาธารณสุขจังหวัดเชียงใหม่","level":"สำนักงานสาธารณสุขจังหวัด","province":"เชียงใหม่","suspended":false},{"code":"38","name":"สำนักงานสาธารณสุขจังหวัดลำพูน","level":"สำนักงานสาธารณสุขจังหวัด","province":"ลำพูน","suspended":false},{"code":"39","name":"สำนักงานสาธารณสุขจังหวัดลำปาง","level":"สำนักงานสาธารณสุขจังหวัด","province":"ลำปาง","suspended":false},{"code":"41","name":"สำนักงานสาธารณสุขจังหวัดแพร่","level":"สำนักงานสาธารณสุขจังหวัด","province":"แพร่","suspended":false},{"code":"42","name":"สำนักงานสาธารณสุขจังหวัดน่าน","level":"สำนักงานสาธารณสุขจังหวัด","province":"น่าน","suspended":false},{"code":"43","name":"สำนักงานสาธารณสุขจังหวัดพะเยา","level":"สำนักงานสาธารณสุขจังหวัด","province":"พะเยา","suspended":false},{"code":"44","name":"สำนักงานสาธารณสุขจังหวัดเชียงราย","level":"สำนักงานสาธารณสุขจังหวัด","province":"เชียงราย","suspended":false},{"code":"45","name":"สำนักงานสาธารณสุขจังหวัดแม่ฮ่องสอน","level":"สำนักงานสาธารณสุขจังหวัด","province":"แม่ฮ่องสอน","suspended":false},{"code":"6009","name":"โรงพยาบาลแม่ตืน","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"10672","name":"โรงพยาบาลลำปาง","level":"โรงพยาบาลศูนย์","province":"ลำปาง","suspended":false},{"code":"10674","name":"โรงพยาบาลเชียงรายประชานุเคราะห์","level":"โรงพยาบาลศูนย์","province":"เชียงราย","suspended":false},{"code":"10713","name":"โรงพยาบาลนครพิงค์","level":"โรงพยาบาลศูนย์","province":"เชียงใหม่","suspended":false},{"code":"10714","name":"โรงพยาบาลลำพูน","level":"โรงพยาบาลทั่วไป","province":"ลำพูน","suspended":false},{"code":"10715","name":"โรงพยาบาลแพร่","level":"โรงพยาบาลทั่วไป","province":"แพร่","suspended":false},{"code":"10716","name":"โรงพยาบาลน่าน","level":"โรงพยาบาลทั่วไป","province":"น่าน","suspended":false},{"code":"10717","name":"โรงพยาบาลพะเยา","level":"โรงพยาบาลทั่วไป","province":"พะเยา","suspended":false},{"code":"10718","name":"โรงพยาบาลเชียงคำ","level":"โรงพยาบาลทั่วไป","province":"พะเยา","suspended":false},{"code":"10719","name":"โรงพยาบาลศรีสังวาลย์","level":"โรงพยาบาลทั่วไป","province":"แม่ฮ่องสอน","suspended":false},{"code":"11119","name":"โรงพยาบาลจอมทอง","level":"โรงพยาบาลทั่วไป","province":"เชียงใหม่","suspended":false},{"code":"11120","name":"โรงพยาบาลเทพรัตนเวชชานุกูลฯ","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11121","name":"โรงพยาบาลเชียงดาว","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11122","name":"โรงพยาบาลดอยสะเก็ด","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11123","name":"โรงพยาบาลแม่แตง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11124","name":"โรงพยาบาลสะเมิง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11125","name":"โรงพยาบาลฝาง","level":"โรงพยาบาลทั่วไป","province":"เชียงใหม่","suspended":false},{"code":"11126","name":"โรงพยาบาลแม่อาย","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11127","name":"โรงพยาบาลพร้าว","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11128","name":"โรงพยาบาลสันป่าตอง","level":"โรงพยาบาลทั่วไป","province":"เชียงใหม่","suspended":false},{"code":"11129","name":"โรงพยาบาลสันกำแพง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"10717","name":"โรงพยาบาลสันทราย","level":"โรงพยาบาลทั่วไป","province":"เชียงใหม่","suspended":false},{"code":"11131","name":"โรงพยาบาลหางดง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11132","name":"โรงพยาบาลฮอด","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11133","name":"โรงพยาบาลดอยเต่า","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11134","name":"โรงพยาบาลอมก๋อย","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11135","name":"โรงพยาบาลสารภี","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11136","name":"โรงพยาบาลเวียงแหง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11137","name":"โรงพยาบาลไชยปราการ","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11138","name":"โรงพยาบาลแม่วาง","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11139","name":"โรงพยาบาลแม่ออน","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11140","name":"โรงพยาบาลแม่ทา","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11141","name":"โรงพยาบาลบ้านโฮ่ง","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11142","name":"โรงพยาบาลลี้","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11143","name":"โรงพยาบาลทุ่งหัวช้าง","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11144","name":"โรงพยาบาลป่าซาง","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11145","name":"โรงพยาบาลบ้านธิ","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"11146","name":"โรงพยาบาลแม่เมาะ","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11147","name":"โรงพยาบาลเกาะคา","level":"โรงพยาบาลทั่วไป","province":"ลำปาง","suspended":false},{"code":"11148","name":"โรงพยาบาลเสริมงาม","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11149","name":"โรงพยาบาลงาว","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11150","name":"โรงพยาบาลแจ้ห่ม","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11151","name":"โรงพยาบาลวังเหนือ","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11152","name":"โรงพยาบาลเถิน","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11153","name":"โรงพยาบาลแม่พริก","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11154","name":"โรงพยาบาลแม่ทะ","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11155","name":"โรงพยาบาลสบปราบ","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11156","name":"โรงพยาบาลห้างฉัตร","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11186","name":"โรงพยาบาลดอกคำใต้","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"11157","name":"โรงพยาบาลเมืองปาน","level":"โรงพยาบาลชุมชน","province":"ลำปาง","suspended":false},{"code":"11166","name":"โรงพยาบาลร้องกวาง","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11167","name":"โรงพยาบาลลอง","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11169","name":"โรงพยาบาลสูงเม่น","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11170","name":"โรงพยาบาลสอง","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11171","name":"โรงพยาบาลวังชิ้น","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11172","name":"โรงพยาบาลหนองม่วงไข่","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11173","name":"โรงพยาบาลแม่จริม","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11174","name":"โรงพยาบาลบ้านหลวง","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11175","name":"โรงพยาบาลนาน้อย","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11176","name":"โรงพยาบาลท่าวังผา","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11177","name":"โรงพยาบาลเวียงสา","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11178","name":"โรงพยาบาลทุ่งช้าง","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11179","name":"โรงพยาบาลเชียงกลาง","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11180","name":"โรงพยาบาลนาหมื่น","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11181","name":"โรงพยาบาลสันติสุข","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11182","name":"โรงพยาบาลบ่อเกลือ","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11183","name":"โรงพยาบาลสองแคว","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11184","name":"โรงพยาบาลจุน","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"11185","name":"โรงพยาบาลเชียงม่วน","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"11187","name":"โรงพยาบาลปง","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"11188","name":"โรงพยาบาลแม่ใจ","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"28823","name":"โรงพยาบาลดอยหลวง","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"15012","name":"โรงพยาบาลสมเด็จพระญาณสังวร","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11454","name":"โรงพยาบาลสมแด็จพระยุพราชเชียงของ","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11202","name":"โรงพยาบาลเวียงเชียงรุ้ง","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11201","name":"โรงพยาบาลแม่ลาว","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11200","name":"โรงพยาบาลแม่ฟ้าหลวง","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11199","name":"โรงพยาบาลขุนตาล","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11198","name":"โรงพยาบาลเวียงแก่น","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11197","name":"โรงพยาบาลพญาเม็งราย","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11196","name":"โรงพยาบาลเวียงป่าเป้า","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11195","name":"โรงพยาบาลแม่สรวย","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11194","name":"โรงพยาบาลแม่สาย","level":"โรงพยาบาลทั่วไป","province":"เชียงราย","suspended":false},{"code":"11193","name":"โรงพยาบาลเชียงแสน","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11192","name":"โรงพยาบาลแม่จัน","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11203","name":"โรงพยาบาลขุนยวม","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11204","name":"โรงพยาบาลปาย","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11205","name":"โรงพยาบาลแม่สะเรียง","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11206","name":"โรงพยาบาลแม่ลาน้อย","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11207","name":"โรงพยาบาลสบเมย","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11208","name":"โรงพยาบาลปางมะผ้า","level":"โรงพยาบาลชุมชน","province":"แม่ฮ่องสอน","suspended":false},{"code":"11452","name":"โรงพยาบาลสมเด็จพระยุพราชเด่นชัย","level":"โรงพยาบาลชุมชน","province":"แพร่","suspended":false},{"code":"11453","name":"โรงพยาบาลสมเด็จพระยุพราชปัว","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11191","name":"โรงพยาบาลป่าแดด","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"11625","name":"โรงพยาบาลเฉลิมพระเกียรติ","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11643","name":"โรงพยาบาลดอยหล่อ","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"11190","name":"โรงพยาบาลพาน","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"23736","name":"โรงพยาบาลวัดจันทร์ เฉลิมพระเกียรติฯ","level":"โรงพยาบาลชุมชน","province":"เชียงใหม่","suspended":false},{"code":"24956","name":"โรงพยาบาลเวียงหนองล่อง","level":"โรงพยาบาลชุมชน","province":"ลำพูน","suspended":false},{"code":"25017","name":"โรงพยาบาลภูเพียง","level":"โรงพยาบาลชุมชน","province":"น่าน","suspended":false},{"code":"11189","name":"โรงพยาบาลเทิง","level":"โรงพยาบาลชุมชน","province":"เชียงราย","suspended":false},{"code":"40744","name":"โรงพยาบาลภูซาง","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"40745","name":"โรงพยาบาลภูกามยาว","level":"โรงพยาบาลชุมชน","province":"พะเยา","suspended":false},{"code":"564","name":"สำนักงานสาธารณสุขอำเภอเสริมงาม","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"565","name":"สำนักงานสาธารณสุขอำเภองาว","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"621","name":"สำนักงานสาธารณสุขอำเภอแม่สาย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"626","name":"สำนักงานสาธารณสุขอำเภอขุนตาล","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"630","name":"สำนักงานสาธารณสุขอำเภอดอยหลวง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"618","name":"สำนักงานสาธารณสุขอำเภอป่าแดด","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"623","name":"สำนักงานสาธารณสุขอำเภอเวียงป่าเป้า","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"622","name":"สำนักงานสาธารณสุขอำเภอแม่สรวย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"614","name":"สำนักงานสาธารณสุขอำเภอเวียงชัย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"613","name":"สำนักงานสาธารณสุขอำเภอเมืองเชียงราย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"615","name":"สำนักงานสาธารณสุขอำเภอเชียงของ","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"616","name":"สำนักงานสาธารณสุขอำเภอเทิง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"617","name":"สำนักงานสาธารณสุขอำเภอพาน","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"619","name":"สำนักงานสาธารณสุขอำเภอแม่จัน","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"620","name":"สำนักงานสาธารณสุขอำเภอเชียงแสน","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"624","name":"สำนักงานสาธารณสุขอำเภอพญาเม็งราย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"627","name":"สำนักงานสาธารณสุขอำเภอแม่ฟ้าหลวง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"628","name":"สำนักงานสาธารณสุขอำเภอแม่ลาว","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"629","name":"สำนักงานสาธารณสุขอำเภอเวียงเชียงรุ้ง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"625","name":"สำนักงานสาธารณสุขอำเภอเวียงแก่น","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงราย","suspended":false},{"code":"531","name":"สำนักงานสาธารณสุขอำเภอแม่แจ่ม","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"542","name":"สำนักงานสาธารณสุขอำเภอสันทราย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"541","name":"สำนักงานสาธารณสุขอำเภอสันกำแพง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"24035","name":"สำนักงานสาธารณสุขอำเภอกัลยาณิวัฒนา","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"539","name":"สำนักงานสาธารณสุขอำเภอพร้าว","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"540","name":"สำนักงานสาธารณสุขอำเภอสันป่าตอง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"537","name":"สำนักงานสาธารณสุขอำเภอฝาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"529","name":"สำนักงานสาธารณสุขอำเภอเมืองเชียงใหม่","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"532","name":"สำนักงานสาธารณสุขอำเภอเชียงดาว","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"538","name":"สำนักงานสาธารณสุขอำเภอแม่อาย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"544","name":"สำนักงานสาธารณสุขอำเภอฮอด","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"545","name":"สำนักงานสาธารณสุขอำเภอดอยเต่า","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"530","name":"สำนักงานสาธารณสุขอำเภอจอมทอง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"533","name":"สำนักงานสาธารณสุขอำเภอดอยสะเก็ด","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"534","name":"สำนักงานสาธารณสุขอำเภอแม่แตง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"535","name":"สำนักงานสาธารณสุขอำเภอแม่ริม","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"536","name":"สำนักงานสาธารณสุขอำเภอสะเมิง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"543","name":"สำนักงานสาธารณสุขอำเภอหางดง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"546","name":"สำนักงานสาธารณสุขอำเภออมก๋อย","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"547","name":"สำนักงานสาธารณสุขอำเภอสารภี","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"548","name":"สำนักงานสาธารณสุขอำเภอเวียงแหง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"549","name":"สำนักงานสาธารณสุขอำเภอไชยปราการ","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"551","name":"สำนักงานสาธารณสุขอำเภอแม่ออน","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"552","name":"สำนักงานสาธารณสุขอำเภอดอยหล่อ","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"550","name":"สำนักงานสาธารณสุขอำเภอแม่วาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"เชียงใหม่","suspended":false},{"code":"14359","name":"สำนักงานสาธารณสุขอำเภอภูเพียง","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"601","name":"สำนักงานสาธารณสุขอำเภอสันติสุข","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"603","name":"สำนักงานสาธารณสุขอำเภอสองแคว","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"594","name":"สำนักงานสาธารณสุขอำเภอนาน้อย","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"595","name":"สำนักงานสาธารณสุขอำเภอปัว","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"597","name":"สำนักงานสาธารณสุขอำเภอเวียงสา","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"596","name":"สำนักงานสาธารณสุขอำเภอท่าวังผา","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"598","name":"สำนักงานสาธารณสุขอำเภอทุ่งช้าง","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"591","name":"สำนักงานสาธารณสุขอำเภอเมืองน่าน","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"593","name":"สำนักงานสาธารณสุขอำเภอบ้านหลวง","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"599","name":"สำนักงานสาธารณสุขอำเภอเชียงกลาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"600","name":"สำนักงานสาธารณสุขอำเภอนาหมื่น","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"604","name":"สำนักงานสาธารณสุขอำเภอเฉลิมพระเกียรติ","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"602","name":"สำนักงานสาธารณสุขอำเภอบ่อเกลือ","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"592","name":"สำนักงานสาธารณสุขอำเภอแม่จริม","level":"สำนักงานสาธารณสุขอำเภอ","province":"น่าน","suspended":false},{"code":"608","name":"สำนักงานสาธารณสุขอำเภอเชียงม่วน","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"606","name":"สำนักงานสาธารณสุขอำเภอจุน","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"610","name":"สำนักงานสาธารณสุขอำเภอปง","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"611","name":"สำนักงานสาธารณสุขอำเภอแม่ใจ","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"609","name":"สำนักงานสาธารณสุขอำเภอดอกคำใต้","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"607","name":"สำนักงานสาธารณสุขอำเภอเชียงคำ","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"612","name":"สำนักงานสาธารณสุขอำเภอภูซาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"605","name":"สำนักงานสาธารณสุขอำเภอเมืองพะเยา","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"14156","name":"สำนักงานสาธารณสุขอำเภอภูกามยาว","level":"สำนักงานสาธารณสุขอำเภอ","province":"พะเยา","suspended":false},{"code":"585","name":"สำนักงานสาธารณสุขอำเภอลอง","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"590","name":"สำนักงานสาธารณสุขอำเภอหนองม่วงไข่","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"583","name":"สำนักงานสาธารณสุขอำเภอเมืองแพร่","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"584","name":"สำนักงานสาธารณสุขอำเภอร้องกวาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"586","name":"สำนักงานสาธารณสุขอำเภอสูงเม่น","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"587","name":"สำนักงานสาธารณสุขอำเภอเด่นชัย","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"588","name":"สำนักงานสาธารณสุขอำเภอสอง","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"589","name":"สำนักงานสาธารณสุขอำเภอวังชิ้น","level":"สำนักงานสาธารณสุขอำเภอ","province":"แพร่","suspended":false},{"code":"631","name":"สำนักงานสาธารณสุขอำเภอเมืองแม่ฮ่องสอน","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"632","name":"สำนักงานสาธารณสุขอำเภอขุนยวม","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"633","name":"สำนักงานสาธารณสุขอำเภอปาย","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"635","name":"สำนักงานสาธารณสุขอำเภอแม่ลาน้อย","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"636","name":"สำนักงานสาธารณสุขอำเภอสบเมย","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"637","name":"สำนักงานสาธารณสุขอำเภอปางมะผ้า","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"634","name":"สำนักงานสาธารณสุขอำเภอแม่สะเรียง","level":"สำนักงานสาธารณสุขอำเภอ","province":"แม่ฮ่องสอน","suspended":false},{"code":"563","name":"สำนักงานสาธารณสุขอำเภอเกาะคา","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"570","name":"สำนักงานสาธารณสุขอำเภอแม่ทะ","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"562","name":"สำนักงานสาธารณสุขอำเภอแม่เมาะ","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"566","name":"สำนักงานสาธารณสุขอำเภอแจ้ห่ม","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"567","name":"สำนักงานสาธารณสุขอำเภอวังเหนือ","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"569","name":"สำนักงานสาธารณสุขอำเภอแม่พริก","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"571","name":"สำนักงานสาธารณสุขอำเภอสบปราบ","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"573","name":"สำนักงานสาธารณสุขอำเภอเมืองปาน","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"568","name":"สำนักงานสาธารณสุขอำเภอเถิน","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"572","name":"สำนักงานสาธารณสุขอำเภอห้างฉัตร","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"561","name":"สำนักงานสาธารณสุขอำเภอเมืองลำปาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำปาง","suspended":false},{"code":"553","name":"สำนักงานสาธารณสุขอำเภอเมืองลำพูน","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"554","name":"สำนักงานสาธารณสุขอำเภอแม่ทา","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"555","name":"สำนักงานสาธารณสุขอำเภอบ้านโฮ่ง","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"556","name":"สำนักงานสาธารณสุขอำเภอลี้","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"557","name":"สำนักงานสาธารณสุขอำเภอทุ่งหัวช้าง","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"558","name":"สำนักงานสาธารณสุขอำเภอป่าซาง","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"559","name":"สำนักงานสาธารณสุขอำเภอบ้านธิ","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false},{"code":"560","name":"สำนักงานสาธารณสุขอำเภอเวียงหนองล่อง","level":"สำนักงานสาธารณสุขอำเภอ","province":"ลำพูน","suspended":false}],"funding_sources":[{"id":1,"code":"2566สำนัก","name":"สำนักงานเขตฯ","fiscal_year":2566,"total_amount":61580298.650000006,"remaining":33317.0,"suspended":false},{"id":2,"code":"2566รพ.เก","name":"รพ.เกาะคา","fiscal_year":2566,"total_amount":3500000.0,"remaining":0.0,"suspended":false},{"id":3,"code":"2566สำนัก","name":"สำนักงานเขตฯ 3.5 ลบ.\nรพ.เกาะคา 1.5 ลบ.","fiscal_year":2566,"total_amount":5000000.0,"remaining":0.0,"suspended":false},{"id":4,"code":"2567รพ.นค","name":"รพ.นครพิงค์=4,167,000,\nรพ.เชียงรายฯ=5,000,000,\nรพ.ลำปาง=5,000,000","fiscal_year":2567,"total_amount":14167000.0,"remaining":0.0,"suspended":false},{"id":5,"code":"2567รพ.นค","name":"รพ.นครพิงค์","fiscal_year":2567,"total_amount":6842870.0,"remaining":715841.0,"suspended":false},{"id":6,"code":"2567รพ.เช","name":"รพ.เชียงราย","fiscal_year":2567,"total_amount":8000000.0,"remaining":785000.0,"suspended":false},{"id":7,"code":"2567รพ.น่","name":"รพ.น่าน","fiscal_year":2567,"total_amount":11728520.0,"remaining":3018000.0,"suspended":false},{"id":8,"code":"2567รพ.ลำ","name":"รพ.ลำปาง","fiscal_year":2567,"total_amount":5477000.0,"remaining":34501.0,"suspended":false},{"id":9,"code":"2567สำนัก","name":"สำนักงานเขตฯ","fiscal_year":2567,"total_amount":25779750.0,"remaining":849881.6999999993,"suspended":false},{"id":10,"code":"2567สำนัก","name":"สำนักงานเขตฯ=2,104,217.7\nรพ.นครพิงค์=2,000,000\nรพ.ลำปาง=1,800,000\nรพ.น่าน=512,819","fiscal_year":2567,"total_amount":6417036.7,"remaining":0.0,"suspended":false},{"id":11,"code":"2568สำนัก","name":"สำนักงานเขตฯ","fiscal_year":2568,"total_amount":14231680.0,"remaining":2812792.83,"suspended":false},{"id":12,"code":"2568รพ.ลำ","name":"รพ.ลำปาง","fiscal_year":2568,"total_amount":10150000.0,"remaining":139300.0,"suspended":false},{"id":13,"code":"2568รพ.นค","name":"รพ.นครพิงค์","fiscal_year":2568,"total_amount":3514920.0,"remaining":0.0,"suspended":false},{"id":14,"code":"2568รพ.นค","name":"รพ.นครพิงค์=7,500,000\nรพ.เชียงรายฯ=5,000,000","fiscal_year":2568,"total_amount":12500000.0,"remaining":0.0,"suspended":false},{"id":15,"code":"2568รพ.แพ","name":"รพ.แพร่","fiscal_year":2568,"total_amount":12500000.0,"remaining":0.0,"suspended":false},{"id":16,"code":"2568รพ.เช","name":"รพ.เชียงรายฯ","fiscal_year":2568,"total_amount":14150000.0,"remaining":0.0,"suspended":false},{"id":17,"code":"2568รพ.นค","name":"รพ.นครพิงค์=2,500,000\nรพ.แพร่=7,500,000","fiscal_year":2568,"total_amount":10000000.0,"remaining":0.0,"suspended":false},{"id":18,"code":"2568รพ.เช","name":"รพ.เชียงรายฯ=850,000\nรพ.ลำปาง=100,000","fiscal_year":2568,"total_amount":950000.0,"remaining":0.0,"suspended":false}],"project_statuses":[{"code":"S01","name":"ดำเนินการแล้วเสร็จ","suspended":false},{"code":"S02","name":"ยกเลิก-ใช้แหล่งเงินอื่นแล้ว","suspended":false},{"code":"S03","name":"อยู่ระหว่างดำเนินการ","suspended":false}],"budget_categories":[{"code":"B01","name":"Trauma","suspended":false},{"code":"B02","name":"การดูแลแบบประคับประคอง","suspended":false},{"code":"B03","name":"การแพทย์ฉุกเฉิน","suspended":false},{"code":"B04","name":"การแพทย์ฉุกเฉิน-EMS","suspended":false},{"code":"B05","name":"ควบคุมโรคติดต่อ","suspended":false},{"code":"B06","name":"ทันตกรรม","suspended":false},{"code":"B07","name":"นโยบายผู้บริหาร","suspended":false},{"code":"B08","name":"นโยบายผู้บริหาร(ภัยพิบัติ)","suspended":false},{"code":"B09","name":"นโยบายผู้บริหาร-PM 2.5","suspended":false},{"code":"B10","name":"ผู้สูงอายุ","suspended":false},{"code":"B11","name":"ภาวะฉุกเฉินสาธารณสุข","suspended":false},{"code":"B12","name":"ระบาดวิทยา","suspended":false},{"code":"B13","name":"วัณโรค","suspended":false},{"code":"B14","name":"วิสัญญี","suspended":false},{"code":"B15","name":"ศัลยกรรม","suspended":false},{"code":"B16","name":"ศัลยกรรมประสาท","suspended":false},{"code":"B17","name":"สุขภาพจิตและจิตเวช","suspended":false},{"code":"B18","name":"ออร์โธปิดิกส์","suspended":false},{"code":"B19","name":"อายุรกรรม","suspended":false},{"code":"B20","name":"อุบัติเหตุและการบาดเจ็บ","suspended":false},{"code":"B21","name":"แพทย์แผนไทย","suspended":false},{"code":"B22","name":"แม่และเด็ก","suspended":false},{"code":"B23","name":"โรคมะเร็ง","suspended":false},{"code":"B24","name":"โรคระบบทางเดินหายใจ","suspended":false},{"code":"B25","name":"โรคหลอดเลือดสมอง","suspended":false},{"code":"B26","name":"โรคหัวใจและหลอดเลือด","suspended":false},{"code":"B27","name":"โรคไต","suspended":false},{"code":"B28","name":"โรคไม่ติดต่อเรื้อรัง","suspended":false}],"fiscal_years":[2566,2567,2568],"owners":["(เหยี่ยวล้านนา = 1 ลบ. /\nอ.แม่อาย = 5 แสน /\nอ.แม่สาย = 5 แสน /\nอ.เมืองเชียงราย  = 5 แสน","SP แพทย์แผนไทย สสจ.ลำปาง","กองตรวจราชการ","คกก.cio สำนักงานเขตฯ","มีหลายแห่ง","รพ.จอมทอง","รพ.ดอยสะเก็ด","รพ.ดอยหลวง","รพ.นครพิงค์","รพ.นครพิงค์-SP อุบัติเหตุ และ ฉุกเฉิน","รพ.น่าน","รพ.ฝาง","รพ.พร้าว","รพ.พะเยา","รพ.พาน","รพ.ลำปาง","รพ.ลำปาง-SP สุขภาพกลุ่มวัย","รพ.ลำพูน","รพ.ลำพูน\nService Plan ผู้สูงอายุ","รพ.ลำพูน/ศูนย์อนามัยที่ 1 (Service Plan แม่และเด็ก)","รพ.ลี้ 24,000 / รพ.ป่าซาง 2,001,692.45 บาท","รพ.ศรีสังวาลย์","รพ.สต.ดงพญา","รพ.สวนปรุง","รพ.สวนปรุง (Service Plan สุขภาพจิตและจิตเวช)","รพ.สันป่าตอง","รพ.เกาะคา (เงินรพ.1.5+เงินสนข.3.5)","รพ.เชียงคำ","รพ.เชียงรายฯ","รพ.เชียงรายฯ\nสสจ.เชียงใหม่","รพ.เชียงรายฯ - Service Plan วัณโรค","รพ.เทพรัตน์/สสจ.เชียงใหม่","รพ.แพร่","รพ.แม่วาง","รพ.แม่สะเรียง","ศูนย์สุขภาพจิตที่ 1 ชม.","สคร.1","สคร.1 ชม.","สถาบันพัฒนาการเด็กฯ","สนง.เขต","สนง.เขต (ล้างหนี้)","สนง.เขต (ล้างหนี้แล้ว)","สนง.เขตฯ (CHRO)","สนง.เขตโอนเงิน","สนงเขต (CFO)","สนงเขต (CHRO)","สนงเขต (CIO)","สนงเขต (CSO)","สนงเขต (สารนิเทศ)","สสจ.น่าน","สสจ.พะเยา","สสจ.ลำปาง","สสจ.ลำพูน","สสจ.เชียงราย","สสจ.เชียงราย / สสจ.พะเยา / สสจ.แพร่ / สสจ.น่าน","สสจ.เชียงใหม่","สสจ.แพร่","สสจ.แม่ฮ่องสอน","สสอ.จังหวัดน่าน","สสอ.จังหวัดพะเยา","สสอ.จังหวัดลำปาง","สสอ.จังหวัดลำพูน","สสอ.จังหวัดเชียงราย","สสอ.จังหวัดเชียงใหม่","สสอ.จังหวัดแพร่","สสอ.จังหวัดแม่ฮ่องสอน","สสอ.บ่อเกลือ","สสอ.เชียงกลาง","สสอ.เชียงราย(เจ้าภาพ)","สสอ.เชียงแสน","สสอ.เมืองเชียงใหม่","สสอ.แม่สาย","สสอ.ไชยปราการ","สำนักงานเขต","สำนักงานเขตสุขภาพที่ 1","สำนักงานเขตสุขภาพที่ 1 \n- งานบริหารทรัพยากรบุคคล","สำนักงานเขตสุขภาพที่ 1 \n- งานยุทธศาสตร์","สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานทรัพย์ (CHRO)","สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ","สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CIO)","สำนักงานเขตสุขภาพที่ 1 - กลุ่มงานยุทธ์ฯ (CSO)","สำนักงานเขตสุขภาพที่ 1 - กลุ่มสารนิเทศ","สำนักงานเขตฯ","สำนักงานเขตฯ\n- งานยทธศาสตร์","สำนักงานเขตฯ\n- งานยุทธศาสตร์"],"audit_log":[]};
+
+        // Application State
+        const app = {
+            data: { ...INITIAL_DATA },
+            currentPage: 'dashboard',
+            currentUser: null,
+            pinRequired: false,
+            pendingAction: null,
+            auditLog: [],
+            filters: {
+                year: '',
+                owner: null,
+                status: null
+            },
+
+            init() {
+                this.setupEventListeners();
+                this.renderDashboard();
+                this.populateYearFilters();
+                this.renderAllTables();
+                this.loadAuditLog();
+            },
+
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = e.target.getAttribute('data-page');
+                        this.navigateTo(page);
+                    });
+                });
+
+                // Hamburger menu
+                document.getElementById('hamburgerBtn').addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('mobile-open');
+                });
+
+                // KPI Cards
+                document.getElementById('remainingCard').addEventListener('click', () => this.showRemainingDropdown());
+                document.getElementById('usedCard').addEventListener('click', () => this.showUsedDropdown());
+                document.getElementById('completedCard').addEventListener('click', () => this.showCompletedDropdown());
+
+                // Dashboard year filter
+                document.getElementById('yearFilter').addEventListener('change', () => this.renderDashboard());
+
+                // Project search
+                document.getElementById('projectSearch').addEventListener('keyup', () => this.filterProjectsDisplay());
+            },
+
+            navigateTo(page) {
+                if (['funding-sources', 'service-units', 'projects', 'statuses', 'categories', 'import-export'].includes(page)) {
+                    this.requirePin(() => {
+                        this.showPage(page);
+                    });
+                } else {
+                    this.showPage(page);
+                }
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            },
+
+            showPage(page) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(page).classList.add('active');
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                document.querySelector(`[data-page="${page}"]`).classList.add('active');
+                this.currentPage = page;
+
+                if (page === 'statuses') this.renderStatuses();
+                if (page === 'categories') this.renderCategories();
+            },
+
+            requirePin(callback) {
+                this.pendingAction = callback;
+                document.getElementById('pinModal').classList.add('show');
+                document.getElementById('pinInput').focus();
+            },
+
+            verifyPin() {
+                const pin = document.getElementById('pinInput').value;
+                if (pin === '0867291841') {
+                    this.closePinModal();
+                    if (this.pendingAction) {
+                        this.pendingAction();
+                        this.pendingAction = null;
+                    }
+                } else {
+                    alert('PIN ไม่ถูกต้อง');
+                    document.getElementById('pinInput').value = '';
+                    document.getElementById('pinInput').focus();
+                }
+            },
+
+            closePinModal() {
+                document.getElementById('pinModal').classList.remove('show');
+                document.getElementById('pinInput').value = '';
+            },
+
+            populateYearFilters() {
+                const years = new Set(this.data.projects.map(p => p.fiscal_year));
+                const yearSelect = document.getElementById('yearFilter');
+                const projectYearSelect = document.getElementById('projectYearFilter');
+
+                Array.from(years).sort((a, b) => b - a).forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = `ปี ${year}`;
+                    yearSelect.appendChild(option.cloneNode(true));
+                    projectYearSelect.appendChild(option.cloneNode(true));
+                });
+            },
+
+            renderDashboard() {
+                const year = document.getElementById('yearFilter').value;
+                let projects = this.data.projects.filter(p => !p.is_cancelled);
+
+                if (year) {
+                    projects = projects.filter(p => p.fiscal_year == year);
+                }
+
+                const remaining = projects.filter(p => p.remaining > 0 && !p.transfer_date).reduce((sum, p) => sum + (p.remaining || 0), 0);
+                const used = projects.filter(p => p.actual_spent > 0).reduce((sum, p) => sum + (p.actual_spent || 0), 0);
+                const completed = projects.filter(p => p.status === 'ดำเนินการแล้วเสร็จ').length;
+                const inProgress = projects.filter(p => p.status === 'อยู่ระหว่างดำเนินการ').length;
+
+                document.getElementById('remainingValue').textContent = this.formatNumber(remaining);
+                document.getElementById('usedValue').textContent = this.formatNumber(used) + ` (${projects.filter(p => p.actual_spent > 0).length})`;
+                document.getElementById('completedValue').textContent = completed;
+                document.getElementById('inProgressValue').textContent = inProgress;
+
+                this.filters.year = year;
+                this.renderProjectsDisplay(projects);
+            },
+
+            formatNumber(num) {
+                if (num >= 1000000) {
+                    return '฿' + (num / 1000000).toFixed(1) + 'M';
+                } else if (num >= 1000) {
+                    return '฿' + (num / 1000).toFixed(1) + 'K';
+                }
+                return '฿' + num.toLocaleString();
+            },
+
+            formatCurrency(num) {
+                return '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                const year = date.getFullYear() + 543;
+                return `${day}/${month}/${year}`;
+            },
+
+            showRemainingDropdown() {
+                const dropdown = document.getElementById('remainingDropdown');
+                const year = document.getElementById('yearFilter').value;
+                let fundingSources = {};
+
+                this.data.projects
+                    .filter(p => !p.is_cancelled && (!year || p.fiscal_year == year) && p.remaining > 0 && !p.transfer_date)
+                    .forEach(p => {
+                        if (!fundingSources[p.funding_source]) {
+                            fundingSources[p.funding_source] = 0;
+                        }
+                        fundingSources[p.funding_source] += p.remaining;
+                    });
+
+                dropdown.innerHTML = '';
+                Object.entries(fundingSources).forEach(([source, amount]) => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.innerHTML = `<span>${source}</span><strong>${this.formatCurrency(amount)}</strong>`;
+                    dropdown.appendChild(item);
+                });
+
+                this.toggleDropdown(dropdown);
+            },
+
+            showUsedDropdown() {
+                const dropdown = document.getElementById('usedDropdown');
+                const year = document.getElementById('yearFilter').value;
+                let owners = {};
+
+                this.data.projects
+                    .filter(p => !p.is_cancelled && (!year || p.fiscal_year == year) && p.actual_spent > 0)
+                    .forEach(p => {
+                        if (!owners[p.owner]) {
+                            owners[p.owner] = { amount: 0, count: 0 };
+                        }
+                        owners[p.owner].amount += p.actual_spent;
+                        owners[p.owner].count += 1;
+                    });
+
+                dropdown.innerHTML = '';
+                Object.entries(owners).forEach(([owner, data]) => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item clickable';
+                    item.innerHTML = `<span>${owner} (${data.count})</span><strong>${this.formatCurrency(data.amount)}</strong>`;
+                    item.addEventListener('click', () => {
+                        this.filters.owner = owner;
+                        this.renderProjectsDisplay();
+                        this.toggleDropdown(dropdown);
+                    });
+                    dropdown.appendChild(item);
+                });
+
+                this.toggleDropdown(dropdown);
+            },
+
+            showCompletedDropdown() {
+                const dropdown = document.getElementById('completedDropdown');
+                const year = document.getElementById('yearFilter').value;
+                let owners = {};
+
+                this.data.projects
+                    .filter(p => !p.is_cancelled && (!year || p.fiscal_year == year) && p.status === 'ดำเนินการแล้วเสร็จ')
+                    .forEach(p => {
+                        if (!owners[p.owner]) {
+                            owners[p.owner] = 0;
+                        }
+                        owners[p.owner] += 1;
+                    });
+
+                dropdown.innerHTML = '';
+                Object.entries(owners).forEach(([owner, count]) => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item clickable';
+                    item.textContent = `${owner} (${count})`;
+                    item.addEventListener('click', () => {
+                        this.filters.owner = owner;
+                        this.renderProjectsDisplay();
+                        this.toggleDropdown(dropdown);
+                    });
+                    dropdown.appendChild(item);
+                });
+
+                this.toggleDropdown(dropdown);
+            },
+
+            toggleDropdown(dropdown) {
+                const isVisible = dropdown.classList.contains('show');
+                document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+                if (!isVisible) {
+                    dropdown.classList.add('show');
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.kpi-card') && !e.target.closest('.dropdown-menu')) {
+                            dropdown.classList.remove('show');
+                        }
+                    }, { once: true });
+                }
+            },
+
+            renderProjectsDisplay(projectsList) {
+                const section = document.getElementById('projectsSection');
+                const grid = document.getElementById('projectsGrid');
+
+                if (!projectsList) {
+                    const year = document.getElementById('yearFilter').value;
+                    projectsList = this.data.projects.filter(p => !p.is_cancelled && (!year || p.fiscal_year == year));
+                }
+
+                if (this.filters.owner) {
+                    projectsList = projectsList.filter(p => p.owner === this.filters.owner);
+                }
+
+                section.classList.add('show');
+                grid.innerHTML = '';
+
+                if (projectsList.length === 0) {
+                    grid.innerHTML = '<div class="no-data">ไม่มีข้อมูลโครงการ</div>';
+                    return;
+                }
+
+                projectsList.forEach(project => {
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    if (project.remaining > 0 && !project.transfer_date) card.classList.add('reserved');
+                    else if (project.status === 'อยู่ระหว่างดำเนินการ') card.classList.add('in-progress');
+                    else if (project.status === 'ดำเนินการแล้วเสร็จ') card.classList.add('completed');
+
+                    const statusClass = project.status === 'ดำเนินการแล้วเสร็จ' ? 'status-completed' : 'status-in-progress';
+                    card.innerHTML = `
+                        <h3>${project.name}</h3>
+                        <div class="project-card-meta"><strong>${project.owner}</strong></div>
+                        <div class="project-card-meta">แหล่งเงิน: ${project.funding_source}</div>
+                        <div class="project-card-amount">${this.formatCurrency(project.approved)}</div>
+                        <span class="project-card-status ${statusClass}">${project.status}</span>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            filterProjectsDisplay() {
+                const search = document.getElementById('projectSearch').value.toLowerCase();
+                const cards = document.querySelectorAll('.project-card');
+                cards.forEach(card => {
+                    const name = card.querySelector('h3').textContent.toLowerCase();
+                    card.style.display = name.includes(search) ? 'block' : 'none';
+                });
+            },
+
+            renderAllTables() {
+                this.renderFundingSources();
+                this.renderServiceUnits();
+                this.renderProjects();
+            },
+
+            renderFundingSources() {
+                const tbody = document.getElementById('fundingBody');
+                tbody.innerHTML = '';
+
+                this.data.funding_sources.forEach(source => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${source.code}</td>
+                        <td>${source.name}</td>
+                        <td>${source.fiscal_year}</td>
+                        <td>${this.formatCurrency(source.total_amount)}</td>
+                        <td>${this.formatCurrency(source.remaining)}</td>
+                        <td>${source.status === 'active' ? '✓ ใช้งาน' : '✗ ระงับ'}</td>
+                        <td>
+                            <button class="btn-sm btn-primary" onclick="app.showFundingModal('edit', ${source.id})">แก้ไข</button>
+                            <button class="btn-sm btn-warning" onclick="app.showTransferModal(${source.id})">โอนเงิน</button>
+                            <button class="btn-sm ${source.status === 'active' ? 'btn-danger' : 'btn-success'}" onclick="app.toggleFundingStatus(${source.id})">
+                                ${source.status === 'active' ? 'ระงับ' : 'เปิด'}
+                            </button>
+                        </td>
+                    `;
+                });
+            },
+
+            renderServiceUnits() {
+                const tbody = document.getElementById('serviceUnitsBody');
+                tbody.innerHTML = '';
+
+                let units = this.data.service_units;
+                const province = document.getElementById('provinceFilter')?.value;
+                const level = document.getElementById('levelFilter')?.value;
+
+                if (province) units = units.filter(u => u.province === province);
+                if (level) units = units.filter(u => u.level === level);
+
+                units.forEach(unit => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${unit.code}</td>
+                        <td>${unit.name}</td>
+                        <td>${unit.level}</td>
+                        <td>${unit.province}</td>
+                        <td>${unit.status === 'active' ? '✓ ใช้งาน' : '✗ ระงับ'}</td>
+                        <td>
+                            <button class="btn-sm btn-primary" onclick="app.showServiceUnitModal('edit', ${unit.id})">แก้ไข</button>
+                            <button class="btn-sm ${unit.status === 'active' ? 'btn-danger' : 'btn-success'}" onclick="app.toggleServiceUnitStatus(${unit.id})">
+                                ${unit.status === 'active' ? 'ระงับ' : 'เปิด'}
+                            </button>
+                        </td>
+                    `;
+                });
+
+                if (document.getElementById('provinceFilter')) {
+                    const provinces = new Set(this.data.service_units.map(u => u.province));
+                    const provinceSelect = document.getElementById('provinceFilter');
+                    if (provinceSelect.children.length === 1) {
+                        Array.from(provinces).sort().forEach(p => {
+                            const option = document.createElement('option');
+                            option.value = p;
+                            option.textContent = p;
+                            provinceSelect.appendChild(option);
+                        });
+                    }
+
+                    const levels = new Set(this.data.service_units.map(u => u.level));
+                    const levelSelect = document.getElementById('levelFilter');
+                    if (levelSelect.children.length === 1) {
+                        Array.from(levels).sort().forEach(l => {
+                            const option = document.createElement('option');
+                            option.value = l;
+                            option.textContent = l;
+                            levelSelect.appendChild(option);
+                        });
+                    }
+                }
+            },
+
+            renderProjects() {
+                const tbody = document.getElementById('projectsBody');
+                tbody.innerHTML = '';
+
+                let projects = this.data.projects.filter(p => !p.is_cancelled);
+
+                const year = document.getElementById('projectYearFilter')?.value;
+                const status = document.getElementById('projectStatusFilter')?.value;
+                const category = document.getElementById('projectCategoryFilter')?.value;
+                const search = document.getElementById('projectNameFilter')?.value?.toLowerCase();
+
+                if (year) projects = projects.filter(p => p.fiscal_year == year);
+                if (status) projects = projects.filter(p => p.status === status);
+                if (category) projects = projects.filter(p => p.budget_category === category);
+                if (search) projects = projects.filter(p => p.name.toLowerCase().includes(search));
+
+                projects.forEach((proj, idx) => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${idx + 1}</td>
+                        <td>${proj.name.substring(0, 50)}...</td>
+                        <td>${proj.owner}</td>
+                        <td>${this.formatCurrency(proj.approved)}</td>
+                        <td>${proj.funding_source}</td>
+                        <td>${this.formatDate(proj.transfer_date)}</td>
+                        <td>${proj.status}</td>
+                        <td>${proj.budget_category}</td>
+                        <td>${proj.fiscal_year}</td>
+                        <td>
+                            <button class="btn-sm btn-primary" onclick="app.showProjectModal('edit', ${proj.id})">แก้ไข</button>
+                            <button class="btn-sm btn-danger" onclick="app.cancelProject(${proj.id})">ยกเลิก</button>
+                        </td>
+                    `;
+                });
+
+                if (document.getElementById('projectStatusFilter')) {
+                    const statuses = new Set(this.data.projects.map(p => p.status));
+                    const statusSelect = document.getElementById('projectStatusFilter');
+                    if (statusSelect.children.length === 1) {
+                        Array.from(statuses).sort().forEach(s => {
+                            const option = document.createElement('option');
+                            option.value = s;
+                            option.textContent = s;
+                            statusSelect.appendChild(option.cloneNode(true));
+                        });
+                    }
+
+                    const categories = new Set(this.data.projects.map(p => p.budget_category));
+                    const categorySelect = document.getElementById('projectCategoryFilter');
+                    if (categorySelect.children.length === 1) {
+                        Array.from(categories).sort().forEach(c => {
+                            const option = document.createElement('option');
+                            option.value = c;
+                            option.textContent = c;
+                            categorySelect.appendChild(option.cloneNode(true));
+                        });
+                    }
+                }
+            },
+
+            renderStatuses() {
+                const tbody = document.getElementById('statusesBody');
+                tbody.innerHTML = '';
+
+                this.data.statuses.forEach(status => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${status.code}</td>
+                        <td>${status.name}</td>
+                        <td>
+                            <button class="btn-sm btn-primary" onclick="app.showStatusModal('edit', ${status.id})">แก้ไข</button>
+                        </td>
+                    `;
+                });
+            },
+
+            renderCategories() {
+                const tbody = document.getElementById('categoriesBody');
+                tbody.innerHTML = '';
+
+                this.data.budget_categories.forEach(category => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${category.code}</td>
+                        <td>${category.name}</td>
+                        <td>
+                            <button class="btn-sm btn-primary" onclick="app.showCategoryModal('edit', ${category.id})">แก้ไข</button>
+                        </td>
+                    `;
+                });
+            },
+
+            showFundingModal(mode, id = null) {
+                const modal = document.getElementById('fundingModal');
+                const title = document.getElementById('fundingModalTitle');
+                const body = document.getElementById('fundingModalBody');
+
+                if (mode === 'add') {
+                    title.textContent = 'เพิ่มแหล่งเงิน';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="fundingCode">
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อ:</label>
+                            <input type="text" id="fundingName">
+                        </div>
+                        <div class="form-group">
+                            <label>ปีงบประมาณ:</label>
+                            <input type="number" id="fundingYear">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินทั้งสิ้น:</label>
+                            <input type="number" id="fundingAmount">
+                        </div>
+                    `;
+                    this.currentFundingId = null;
+                } else {
+                    const source = this.data.funding_sources.find(s => s.id === id);
+                    title.textContent = 'แก้ไขแหล่งเงิน';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="fundingCode" value="${source.code}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อ:</label>
+                            <input type="text" id="fundingName" value="${source.name}">
+                        </div>
+                        <div class="form-group">
+                            <label>ปีงบประมาณ:</label>
+                            <input type="number" id="fundingYear" value="${source.fiscal_year}">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินทั้งสิ้น:</label>
+                            <input type="number" id="fundingAmount" value="${source.total_amount}">
+                        </div>
+                    `;
+                    this.currentFundingId = id;
+                }
+
+                modal.classList.add('show');
+            },
+
+            saveFunding() {
+                const code = document.getElementById('fundingCode').value;
+                const name = document.getElementById('fundingName').value;
+                const year = parseInt(document.getElementById('fundingYear').value);
+                const amount = parseFloat(document.getElementById('fundingAmount').value);
+
+                if (!code || !name || !year || !amount) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
+                if (this.currentFundingId) {
+                    const source = this.data.funding_sources.find(s => s.id === this.currentFundingId);
+                    const oldData = { ...source };
+                    source.name = name;
+                    source.fiscal_year = year;
+                    source.total_amount = amount;
+                    this.logAudit('edit_funding', source, oldData);
+                } else {
+                    const newId = Math.max(...this.data.funding_sources.map(s => s.id || 0), 0) + 1;
+                    this.data.funding_sources.push({
+                        id: newId,
+                        code,
+                        name,
+                        fiscal_year: year,
+                        total_amount: amount,
+                        remaining: amount,
+                        status: 'active'
+                    });
+                    this.logAudit('add_funding', { code, name, fiscal_year: year, total_amount: amount });
+                }
+
+                this.closeFundingModal();
+                this.renderFundingSources();
+            },
+
+            closeFundingModal() {
+                document.getElementById('fundingModal').classList.remove('show');
+            },
+
+            showTransferModal(fundingId) {
+                const modal = document.getElementById('transferModal');
+                const source = this.data.funding_sources.find(s => s.id === fundingId);
+                const sameYearSources = this.data.funding_sources.filter(s => s.fiscal_year === source.fiscal_year && s.id !== fundingId);
+
+                let options = '<option value="">-- เลือกแหล่งเงินปลายทาง --</option>';
+                sameYearSources.forEach(s => {
+                    options += `<option value="${s.id}">${s.name}</option>`;
+                });
+
+                const body = document.getElementById('transferModalBody');
+                body.innerHTML = `
+                    <div class="form-group">
+                        <label>แหล่งเงินต้นทาง:</label>
+                        <input type="text" value="${source.name}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>เงินคงเหลือ:</label>
+                        <input type="text" value="${this.formatCurrency(source.remaining)}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>แหล่งเงินปลายทาง:</label>
+                        <select id="targetFundingId">${options}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>จำนวนเงินที่โอน:</label>
+                        <input type="number" id="transferAmount">
+                    </div>
+                    <div class="form-group">
+                        <label>เหตุผล:</label>
+                        <textarea id="transferReason"></textarea>
+                    </div>
+                `;
+
+                this.currentTransferId = fundingId;
+                modal.classList.add('show');
+            },
+
+            saveTransfer() {
+                const targetId = parseInt(document.getElementById('targetFundingId').value);
+                const amount = parseFloat(document.getElementById('transferAmount').value);
+                const reason = document.getElementById('transferReason').value;
+
+                if (!targetId || !amount || amount <= 0) {
+                    alert('กรุณากรอกข้อมูลให้ถูกต้อง');
+                    return;
+                }
+
+                const source = this.data.funding_sources.find(s => s.id === this.currentTransferId);
+                const target = this.data.funding_sources.find(s => s.id === targetId);
+
+                if (amount > source.remaining) {
+                    alert('จำนวนเงินโอนมากกว่าเงินคงเหลือ');
+                    return;
+                }
+
+                source.remaining -= amount;
+                target.remaining += amount;
+
+                this.logAudit('transfer_funding', {
+                    from: source.name,
+                    to: target.name,
+                    amount,
+                    reason
+                });
+
+                this.closeTransferModal();
+                this.renderFundingSources();
+            },
+
+            closeTransferModal() {
+                document.getElementById('transferModal').classList.remove('show');
+            },
+
+            toggleFundingStatus(id) {
+                const source = this.data.funding_sources.find(s => s.id === id);
+                source.status = source.status === 'active' ? 'suspended' : 'active';
+                this.logAudit(`${source.status === 'active' ? 'suspend' : 'activate'}_funding`, { name: source.name });
+                this.renderFundingSources();
+            },
+
+            showServiceUnitModal(mode, id = null) {
+                const modal = document.getElementById('serviceUnitModal');
+                const title = document.getElementById('serviceUnitModalTitle');
+                const body = document.getElementById('serviceUnitModalBody');
+
+                if (mode === 'add') {
+                    title.textContent = 'เพิ่มหน่วยบริการ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="unitCode">
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อ:</label>
+                            <input type="text" id="unitName">
+                        </div>
+                        <div class="form-group">
+                            <label>ระดับ:</label>
+                            <input type="text" id="unitLevel">
+                        </div>
+                        <div class="form-group">
+                            <label>จังหวัด:</label>
+                            <input type="text" id="unitProvince">
+                        </div>
+                    `;
+                    this.currentUnitId = null;
+                } else {
+                    const unit = this.data.service_units.find(u => u.id === id);
+                    title.textContent = 'แก้ไขหน่วยบริการ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="unitCode" value="${unit.code}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อ:</label>
+                            <input type="text" id="unitName" value="${unit.name}">
+                        </div>
+                        <div class="form-group">
+                            <label>ระดับ:</label>
+                            <input type="text" id="unitLevel" value="${unit.level}">
+                        </div>
+                        <div class="form-group">
+                            <label>จังหวัด:</label>
+                            <input type="text" id="unitProvince" value="${unit.province}">
+                        </div>
+                    `;
+                    this.currentUnitId = id;
+                }
+
+                modal.classList.add('show');
+            },
+
+            saveServiceUnit() {
+                const code = document.getElementById('unitCode').value;
+                const name = document.getElementById('unitName').value;
+                const level = document.getElementById('unitLevel').value;
+                const province = document.getElementById('unitProvince').value;
+
+                if (!code || !name || !level || !province) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
+                if (this.currentUnitId) {
+                    const unit = this.data.service_units.find(u => u.id === this.currentUnitId);
+                    const oldData = { ...unit };
+                    unit.name = name;
+                    unit.level = level;
+                    unit.province = province;
+                    this.logAudit('edit_service_unit', unit, oldData);
+                } else {
+                    const newId = Math.max(...this.data.service_units.map(u => u.id || 0), 0) + 1;
+                    this.data.service_units.push({
+                        id: newId,
+                        code,
+                        name,
+                        level,
+                        province,
+                        status: 'active'
+                    });
+                    this.logAudit('add_service_unit', { code, name, level, province });
+                }
+
+                this.closeServiceUnitModal();
+                this.renderServiceUnits();
+            },
+
+            closeServiceUnitModal() {
+                document.getElementById('serviceUnitModal').classList.remove('show');
+            },
+
+            toggleServiceUnitStatus(id) {
+                const unit = this.data.service_units.find(u => u.id === id);
+                unit.status = unit.status === 'active' ? 'suspended' : 'active';
+                this.logAudit(`${unit.status === 'active' ? 'suspend' : 'activate'}_service_unit`, { name: unit.name });
+                this.renderServiceUnits();
+            },
+
+            showProjectModal(mode, id = null) {
+                const modal = document.getElementById('projectModal');
+                const title = document.getElementById('projectModalTitle');
+                const body = document.getElementById('projectModalBody');
+
+                let fundingOptions = '<option value="">-- เลือกแหล่งเงิน --</option>';
+                this.data.funding_sources.forEach(source => {
+                    fundingOptions += `<option value="${source.id}">${source.name}</option>`;
+                });
+
+                let statusOptions = '<option value="">-- เลือกสถานะ --</option>';
+                this.data.statuses.forEach(status => {
+                    statusOptions += `<option value="${status.name}">${status.name}</option>`;
+                });
+
+                let categoryOptions = '<option value="">-- เลือกหมวดหมู่ --</option>';
+                this.data.budget_categories.forEach(category => {
+                    categoryOptions += `<option value="${category.name}">${category.name}</option>`;
+                });
+
+                let ownerOptions = '<option value="">-- เลือกเจ้าของ --</option>';
+                const owners = new Set(this.data.projects.map(p => p.owner));
+                Array.from(owners).sort().forEach(owner => {
+                    ownerOptions += `<option value="${owner}">${owner}</option>`;
+                });
+
+                if (mode === 'add') {
+                    title.textContent = 'เพิ่มโครงการ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>ชื่อโครงการ:</label>
+                            <textarea id="projectName"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>เจ้าของ:</label>
+                            <select id="projectOwner">${ownerOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินขอ:</label>
+                            <input type="number" id="projectRequested">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินอนุมัติ:</label>
+                            <input type="number" id="projectApproved">
+                        </div>
+                        <div class="form-group">
+                            <label>แหล่งเงิน:</label>
+                            <select id="projectFunding">${fundingOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>วันโอนเงิน:</label>
+                            <input type="date" id="projectTransferDate">
+                        </div>
+                        <div class="form-group">
+                            <label>สถานะ:</label>
+                            <select id="projectStatus">${statusOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>หมวดหมู่:</label>
+                            <select id="projectCategory">${categoryOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>ปีงบประมาณ:</label>
+                            <input type="number" id="projectFiscalYear">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินจ่ายจริง:</label>
+                            <input type="number" id="projectActualSpent" value="0">
+                        </div>
+                    `;
+                    this.currentProjectId = null;
+                } else {
+                    const project = this.data.projects.find(p => p.id === id);
+                    title.textContent = 'แก้ไขโครงการ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>ชื่อโครงการ:</label>
+                            <textarea id="projectName">${project.name}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>เจ้าของ:</label>
+                            <select id="projectOwner">${ownerOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินขอ:</label>
+                            <input type="number" id="projectRequested" value="${project.requested}">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินอนุมัติ:</label>
+                            <input type="number" id="projectApproved" value="${project.approved}">
+                        </div>
+                        <div class="form-group">
+                            <label>แหล่งเงิน:</label>
+                            <select id="projectFunding">${fundingOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>วันโอนเงิน:</label>
+                            <input type="date" id="projectTransferDate" value="${project.transfer_date}">
+                        </div>
+                        <div class="form-group">
+                            <label>สถานะ:</label>
+                            <select id="projectStatus">${statusOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>หมวดหมู่:</label>
+                            <select id="projectCategory">${categoryOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>ปีงบประมาณ:</label>
+                            <input type="number" id="projectFiscalYear" value="${project.fiscal_year}">
+                        </div>
+                        <div class="form-group">
+                            <label>วงเงินจ่ายจริง:</label>
+                            <input type="number" id="projectActualSpent" value="${project.actual_spent || 0}">
+                        </div>
+                    `;
+                    document.getElementById('projectOwner').value = project.owner;
+                    document.getElementById('projectStatus').value = project.status;
+                    document.getElementById('projectCategory').value = project.budget_category;
+                    this.currentProjectId = id;
+                }
+
+                modal.classList.add('show');
+            },
+
+            saveProject() {
+                const name = document.getElementById('projectName').value;
+                const owner = document.getElementById('projectOwner').value;
+                const requested = parseFloat(document.getElementById('projectRequested').value) || 0;
+                const approved = parseFloat(document.getElementById('projectApproved').value) || 0;
+                const fundingId = parseInt(document.getElementById('projectFunding').value);
+                const transferDate = document.getElementById('projectTransferDate').value;
+                const status = document.getElementById('projectStatus').value;
+                const category = document.getElementById('projectCategory').value;
+                const fiscalYear = parseInt(document.getElementById('projectFiscalYear').value);
+                const actualSpent = parseFloat(document.getElementById('projectActualSpent').value) || 0;
+
+                if (!name || !owner || !approved || !fundingId || !status || !category || !fiscalYear) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
+                const fundingSource = this.data.funding_sources.find(s => s.id === fundingId);
+
+                if (this.currentProjectId) {
+                    const project = this.data.projects.find(p => p.id === this.currentProjectId);
+                    const oldData = { ...project };
+                    project.name = name;
+                    project.owner = owner;
+                    project.requested = requested;
+                    project.approved = approved;
+                    project.funding_source = fundingSource.name;
+                    project.transfer_date = transferDate;
+                    project.status = status;
+                    project.budget_category = category;
+                    project.fiscal_year = fiscalYear;
+                    project.actual_spent = actualSpent;
+                    project.remaining = approved - actualSpent;
+                    this.logAudit('edit_project', project, oldData);
+                } else {
+                    const newId = Math.max(...this.data.projects.map(p => p.id || 0), 0) + 1;
+                    this.data.projects.push({
+                        id: newId,
+                        name,
+                        owner,
+                        requested,
+                        approved,
+                        funding_source: fundingSource.name,
+                        transfer_date: transferDate,
+                        actual_spent: actualSpent,
+                        remaining: approved - actualSpent,
+                        status,
+                        remarks: '',
+                        budget_category: category,
+                        fiscal_year: fiscalYear
+                    });
+                    this.logAudit('add_project', { name, owner, approved });
+                }
+
+                this.closeProjectModal();
+                this.renderProjects();
+                this.renderDashboard();
+            },
+
+            closeProjectModal() {
+                document.getElementById('projectModal').classList.remove('show');
+            },
+
+            cancelProject(id) {
+                if (confirm('ยืนยันการยกเลิกโครงการนี้?')) {
+                    const project = this.data.projects.find(p => p.id === id);
+                    project.is_cancelled = true;
+                    this.logAudit('cancel_project', { name: project.name });
+                    this.renderProjects();
+                    this.renderDashboard();
+                }
+            },
+
+            showStatusModal(mode, id = null) {
+                const modal = document.getElementById('statusModal');
+                const title = document.getElementById('statusModalTitle');
+                const body = document.getElementById('statusModalBody');
+
+                if (mode === 'add') {
+                    title.textContent = 'เพิ่มสถานะ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="statusCode">
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อสถานะ:</label>
+                            <input type="text" id="statusName">
+                        </div>
+                    `;
+                    this.currentStatusId = null;
+                } else {
+                    const status = this.data.statuses.find(s => s.id === id);
+                    title.textContent = 'แก้ไขสถานะ';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="statusCode" value="${status.code}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อสถานะ:</label>
+                            <input type="text" id="statusName" value="${status.name}">
+                        </div>
+                    `;
+                    this.currentStatusId = id;
+                }
+
+                modal.classList.add('show');
+            },
+
+            saveStatus() {
+                const code = document.getElementById('statusCode').value;
+                const name = document.getElementById('statusName').value;
+
+                if (!code || !name) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
+                if (this.currentStatusId) {
+                    const status = this.data.statuses.find(s => s.id === this.currentStatusId);
+                    status.name = name;
+                    this.logAudit('edit_status', status);
+                } else {
+                    const newId = Math.max(...this.data.statuses.map(s => s.id || 0), 0) + 1;
+                    this.data.statuses.push({ id: newId, code, name });
+                    this.logAudit('add_status', { code, name });
+                }
+
+                this.closeStatusModal();
+                this.renderStatuses();
+            },
+
+            closeStatusModal() {
+                document.getElementById('statusModal').classList.remove('show');
+            },
+
+            showCategoryModal(mode, id = null) {
+                const modal = document.getElementById('categoryModal');
+                const title = document.getElementById('categoryModalTitle');
+                const body = document.getElementById('categoryModalBody');
+
+                if (mode === 'add') {
+                    title.textContent = 'เพิ่มหมวดหมู่';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="categoryCode">
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อหมวดหมู่:</label>
+                            <input type="text" id="categoryName">
+                        </div>
+                    `;
+                    this.currentCategoryId = null;
+                } else {
+                    const category = this.data.budget_categories.find(c => c.id === id);
+                    title.textContent = 'แก้ไขหมวดหมู่';
+                    body.innerHTML = `
+                        <div class="form-group">
+                            <label>รหัส:</label>
+                            <input type="text" id="categoryCode" value="${category.code}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อหมวดหมู่:</label>
+                            <input type="text" id="categoryName" value="${category.name}">
+                        </div>
+                    `;
+                    this.currentCategoryId = id;
+                }
+
+                modal.classList.add('show');
+            },
+
+            saveCategory() {
+                const code = document.getElementById('categoryCode').value;
+                const name = document.getElementById('categoryName').value;
+
+                if (!code || !name) {
+                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+
+                if (this.currentCategoryId) {
+                    const category = this.data.budget_categories.find(c => c.id === this.currentCategoryId);
+                    category.name = name;
+                    this.logAudit('edit_category', category);
+                } else {
+                    const newId = Math.max(...this.data.budget_categories.map(c => c.id || 0), 0) + 1;
+                    this.data.budget_categories.push({ id: newId, code, name });
+                    this.logAudit('add_category', { code, name });
+                }
+
+                this.closeCategoryModal();
+                this.renderCategories();
+            },
+
+            closeCategoryModal() {
+                document.getElementById('categoryModal').classList.remove('show');
+            },
+
+            toggleProjectAuditLog() {
+                const auditLog = document.getElementById('projectsAuditLog');
+                if (auditLog.style.display === 'none') {
+                    auditLog.style.display = 'block';
+                    this.renderProjectAuditLog();
+                } else {
+                    auditLog.style.display = 'none';
+                }
+            },
+
+            renderProjectAuditLog() {
+                const content = document.getElementById('projectsAuditContent');
+                content.innerHTML = '';
+
+                const projectAudits = this.auditLog.filter(log => log.action.includes('project'));
+                if (projectAudits.length === 0) {
+                    content.innerHTML = '<div class="no-data">ไม่มีบันทึก</div>';
+                    return;
+                }
+
+                projectAudits.slice(-50).reverse().forEach(log => {
+                    const entry = document.createElement('div');
+                    entry.className = 'audit-log-entry';
+                    entry.innerHTML = `
+                        <strong>${log.action}</strong><br>
+                        ${JSON.stringify(log.data).substring(0, 100)}...<br>
+                        <span class="audit-log-time">${log.timestamp}</span>
+                    `;
+                    content.appendChild(entry);
+                });
+            },
+
+            logAudit(action, data, oldData = null) {
+                const entry = {
+                    action,
+                    data,
+                    oldData,
+                    timestamp: new Date().toLocaleString('th-TH')
+                };
+                this.auditLog.push(entry);
+            },
+
+            loadAuditLog() {
+                // Initialize empty audit log or load from storage
+            },
+
+            exportData() {
+                const exportData = {
+                    projects: this.data.projects,
+                    funding_sources: this.data.funding_sources,
+                    service_units: this.data.service_units,
+                    statuses: this.data.statuses,
+                    budget_categories: this.data.budget_categories,
+                    audit_log: this.auditLog
+                };
+
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `budget_export_${new Date().getTime()}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            },
+
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        this.data = imported;
+                        this.auditLog = imported.audit_log || [];
+                        alert('นำเข้าข้อมูลสำเร็จ');
+                        this.renderAllTables();
+                        this.renderDashboard();
+                    } catch (err) {
+                        alert('ไฟล์ไม่ถูกต้อง: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        // Initialize app on page load
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
